@@ -3,11 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Docubase · Docs that read like a letter</title>
+<title>Docubase · Markdown in. A docs site out.</title>
 <meta name="description" content="Open source docs from a folder of Markdown. Built in search, Ask AI on your own key, MCP for agents, drift checks in CI, and hosting from git.">
-<meta name="theme-color" content="#f3f6f2" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#0e1612" media="(prefers-color-scheme: dark)">
-<meta property="og:title" content="Docubase · Docs that read like a letter">
+<meta name="theme-color" content="#ffffff">
+<meta property="og:title" content="Docubase · Markdown in. A docs site out.">
 <meta property="og:description" content="Open source docs from a folder of Markdown, with search, agents and hosting built in.">
 <meta property="og:type" content="website">
 {{head}}
@@ -16,234 +15,338 @@
 {{header}}
 <main id="main">
 
-  <!-- Hero: a live painted sky behind the largest type on the page -->
-  <section class="hero" aria-labelledby="hero-title">
-    <div class="hero-sky" data-sky>
-      <canvas class="sky-canvas" aria-hidden="true"></canvas>
-      <div class="grain" aria-hidden="true"></div>
-    </div>
-    <div class="hero-inner">
-      <p class="eyebrow load" style="--d:0">Open source documentation, MIT licensed</p>
+  <!-- Hero: a black stage with the dot field -->
+  <section class="stage hero" aria-labelledby="hero-title">
+    <canvas class="dots" data-dots="hero" aria-hidden="true"></canvas>
+    <div class="hero-body">
+      <p class="proof load" style="--d:0"><span class="pips" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>Open source · MIT licensed</p>
       <h1 class="hero-title" id="hero-title">
-        <span class="line"><span class="load" style="--d:1">Docs that read</span></span>
-        <span class="line"><span class="load" style="--d:2">like a <em>letter.</em></span></span>
+        <span class="line"><span class="load" style="--d:1">Markdown in.</span></span>
+        <span class="line"><span class="load" style="--d:2">A <span class="accent">docs site</span> out.</span></span>
       </h1>
-      <div class="hero-foot">
-        <p class="hero-lede load" style="--d:3">Point one command at a folder of Markdown. Get a fast site with search, an assistant on your own key, and pages that coding agents can read.</p>
-        <div class="hero-actions load" style="--d:4">
-          <button class="cmd" type="button" data-copy="npx docubase dev docs" aria-label="Copy the command npx docubase dev docs">
-            <span class="cmd-prompt" aria-hidden="true">$</span><code>npx docubase dev docs</code><span class="cmd-hint" data-copy-label>Copy</span>
-          </button>
-          <a class="btn btn-primary btn-lg" href="/docs/getting-started/" data-magnetic>Read the guide</a>
+      <p class="hero-lede load" style="--d:3">Point one command at a folder of Markdown. Get fast, searchable docs that people and coding agents can read, with no account and no metered credits.</p>
+      <button class="cmdbar load" style="--d:4" type="button" data-copy="npx docubase dev docs" aria-label="Copy the command npx docubase dev docs">
+        <span class="cp" aria-hidden="true">$</span><code>npx docubase dev docs</code>
+        <span class="cb" aria-hidden="true"><svg class="ic-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="3"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg><svg class="ic-done" viewBox="0 0 24 24"><path d="m5 12 5 5 9-10"/></svg></span>
+      </button>
+      <p class="hero-note load" style="--d:5"><span data-copy-label>Copy it, run it, and your docs are live on localhost.</span></p>
+    </div>
+    <div class="trust load" style="--d:7">
+      <p class="trust-h">Built into every site</p>
+      <div class="marquee">
+        <div class="marquee-track">
+          <span class="chiplet"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>Offline search</span>
+          <span class="chiplet"><svg viewBox="0 0 24 24"><path d="M4 5h16v10H8l-4 4z"/></svg>Ask AI</span>
+          <span class="chiplet"><svg viewBox="0 0 24 24"><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="18" cy="18" r="2.5"/><path d="M8.3 11 15.7 7M8.3 13l7.4 4"/></svg>MCP server</span>
+          <span class="chiplet"><svg viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6z"/><path d="M9 12h7M9 16h5"/></svg>llms.txt</span>
+          <span class="chiplet"><svg viewBox="0 0 24 24"><path d="M12 3 3 8l9 5 9-5z"/><path d="m3 13 9 5 9-5"/></svg>OpenAPI</span>
+          <span class="chiplet"><svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 3-6.2"/><path d="M4 4v4h4"/></svg>Drift checks</span>
+          <span class="chiplet"><svg viewBox="0 0 24 24"><path d="M4 11a9 9 0 0 1 9 9M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="19" r="1.5"/></svg>Atom feed</span>
+          <span class="chiplet"><svg viewBox="0 0 24 24"><path d="M20 14A8 8 0 1 1 10 4a6 6 0 0 0 10 10z"/></svg>Dark mode</span>
+          <span class="chiplet" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>Offline search</span>
+          <span class="chiplet" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 5h16v10H8l-4 4z"/></svg>Ask AI</span>
+          <span class="chiplet" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="18" cy="18" r="2.5"/><path d="M8.3 11 15.7 7M8.3 13l7.4 4"/></svg>MCP server</span>
+          <span class="chiplet" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6z"/><path d="M9 12h7M9 16h5"/></svg>llms.txt</span>
+          <span class="chiplet" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3 3 8l9 5 9-5z"/><path d="m3 13 9 5 9-5"/></svg>OpenAPI</span>
+          <span class="chiplet" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 3-6.2"/><path d="M4 4v4h4"/></svg>Drift checks</span>
+          <span class="chiplet" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 11a9 9 0 0 1 9 9M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="19" r="1.5"/></svg>Atom feed</span>
+          <span class="chiplet" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20 14A8 8 0 1 1 10 4a6 6 0 0 0 10 10z"/></svg>Dark mode</span>
         </div>
       </div>
     </div>
-    <a class="scroll-cue load" style="--d:6" href="#typeset" aria-label="Scroll to see how it works"><span></span></a>
   </section>
 
-  <!-- Ticker of real features -->
-  <div class="ticker" aria-label="Features">
-    <div class="ticker-track">
-      <ul>
-        <li>Full text search</li><li>Ask AI, streamed</li><li>llms.txt</li><li>MCP for agents</li><li>OpenAPI with Try it</li><li>Drift checks in CI</li><li>Dark mode</li><li>Nuxt module</li><li>Hosting from git</li><li>No account</li>
-      </ul>
-      <ul aria-hidden="true">
-        <li>Full text search</li><li>Ask AI, streamed</li><li>llms.txt</li><li>MCP for agents</li><li>OpenAPI with Try it</li><li>Drift checks in CI</li><li>Dark mode</li><li>Nuxt module</li><li>Hosting from git</li><li>No account</li>
-      </ul>
-    </div>
-  </div>
-
-  <!-- Signature: scroll sets raw Markdown into a finished page -->
-  <section class="typeset" id="typeset" data-progress aria-labelledby="typeset-title">
-    <div class="typeset-pin">
-      <div class="typeset-copy">
-        <p class="eyebrow">How it works</p>
-        <h2 class="section-title" id="typeset-title">From a text file to a page people <em>want</em> to read.</h2>
-        <ol class="stages" data-stages>
-          <li class="stage"><span class="stage-n">01</span><span class="stage-t">You write plain Markdown, with callouts and tabs when you need them.</span></li>
-          <li class="stage"><span class="stage-n">02</span><span class="stage-t">Docubase sets it in type, builds the sidebar and indexes every section for search.</span></li>
-          <li class="stage"><span class="stage-n">03</span><span class="stage-t">Readers get dark mode, copy buttons and a contents list, with nothing to configure.</span></li>
-        </ol>
-        <div class="typeset-bar" aria-hidden="true"><span></span></div>
+  <!-- What you get -->
+  <section class="sec" aria-labelledby="get-title">
+    <div class="wrap">
+      <div class="head" data-reveal>
+        <p class="tag">What you get</p>
+        <h2 class="title" id="get-title">Docs that work for everyone <br>who reads them</h2>
+        <p class="lede">People search them, agents query them, and CI keeps them honest.</p>
       </div>
-
-      <div class="window" aria-hidden="true">
-        <div class="window-bar"><i></i><i></i><i></i><span class="window-file">docs/deploying.md</span></div>
-        <div class="window-body">
-          <span class="scan"></span>
-          <!-- Raw Markdown -->
-          <pre class="layer raw"><span class="r" style="--t:.10"><b>---</b></span>
-<span class="r" style="--t:.11"><b>title:</b> Deploying</span>
-<span class="r" style="--t:.12"><b>---</b></span>
-<span class="r" style="--t:.14"><b>#</b> Deploying</span>
-<span class="r" style="--t:.18">Ship the site to any static host.</span>
-<span class="r" style="--t:.22"><b>##</b> With Docker</span>
-<span class="r" style="--t:.26"><b>:::tip[</b>Fast path<b>]</b></span>
-<span class="r" style="--t:.27">Run the image and open port <b>`</b>8080<b>`</b>.</span>
-<span class="r" style="--t:.28"><b>:::</b></span>
-<span class="r" style="--t:.32"><b>```bash</b></span>
-<span class="r" style="--t:.33">docker run -p 8080:80 acme/docs</span>
-<span class="r" style="--t:.34"><b>```</b></span>
-<span class="r" style="--t:.38"><b>-</b> Search, built in</span>
-<span class="r" style="--t:.39"><b>-</b> Works offline</span></pre>
-
-          <!-- The finished page; a dark copy is cloned over it by script -->
-          <div class="layer page" data-page>
-            <div class="pg-top v" style="--t:.50"><span class="pg-mark">A</span><span class="pg-name">Acme</span><span class="pg-search">Search<kbd>⌘K</kbd></span><span class="pg-toggle" data-toggle></span></div>
-            <div class="pg-shell">
-              <ul class="pg-side v" style="--t:.54"><li>Getting started</li><li class="on">Deploying</li><li>Search</li><li><em>Guides</em></li><li>Writing</li><li>API</li></ul>
-              <div class="pg-main">
-                <p class="pg-h1 v" style="--t:.19">Deploying</p>
-                <p class="pg-lead v" style="--t:.23">Ship the site to any static host.</p>
-                <p class="pg-h2 v" style="--t:.27">With Docker</p>
-                <div class="pg-tip v" style="--t:.32"><em>Fast path</em><span>Run the image and open port <code>8080</code>.</span></div>
-                <div class="pg-code v" style="--t:.38"><code>docker run -p 8080:80 acme/docs</code><span class="pg-copy">Copy</span></div>
-                <ul class="pg-list v" style="--t:.43"><li>Search, built in</li><li>Works offline</li></ul>
-              </div>
+      <div class="bento">
+        <div class="bento-col">
+          <article class="cell" data-reveal>
+            <span class="ico"><svg viewBox="0 0 24 24"><path d="M4 5h16v10H8l-4 4z"/><path d="M8 9h8M8 12h5"/></svg></span>
+            <h3>Ask AI, streamed</h3>
+            <p>Answers from your docs through your own Anthropic or OpenAI compatible key. Closing the dialog stops the bill.</p>
+          </article>
+          <article class="cell" data-reveal style="--rd:2">
+            <span class="ico"><svg viewBox="0 0 24 24"><path d="M12 3 3 8l9 5 9-5z"/><path d="m3 13 9 5 9-5"/></svg></span>
+            <h3>OpenAPI with Try it</h3>
+            <p>Every endpoint in your spec gets a reference page and a request form that calls your API.</p>
+          </article>
+        </div>
+        <div class="bento-col mid">
+          <article class="cell cell-hero" data-reveal style="--rd:1">
+            <span class="ico"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></span>
+            <h3>Every section, found as you type</h3>
+            <p>The index is built with the site and runs in the browser. No search service, no API key, works offline.</p>
+            <div class="demo" aria-hidden="true" data-search>
+              <div class="sb-input"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><span data-q></span><i class="caret"></i><kbd>⌘K</kbd></div>
+              <ul class="sb-results" data-results></ul>
+              <p class="sb-foot"><span data-count-results>0 results</span><span>Offline</span></p>
             </div>
+          </article>
+        </div>
+        <div class="bento-col">
+          <article class="cell" data-reveal style="--rd:2">
+            <span class="ico"><svg viewBox="0 0 24 24"><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="18" cy="18" r="2.5"/><path d="M8.3 11 15.7 7M8.3 13l7.4 4"/></svg></span>
+            <h3>MCP for agents</h3>
+            <p>Coding agents search and read your docs, locally over stdio or hosted over HTTP.</p>
+          </article>
+          <article class="cell" data-reveal style="--rd:3">
+            <span class="ico"><svg viewBox="0 0 24 24"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M4 19h16"/></svg></span>
+            <h3>Hosting from git</h3>
+            <p>A push rebuilds the site, with custom domains verified by DNS. Or run the same server yourself.</p>
+          </article>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Comparison -->
+  <section class="sec" style="padding-top:0" aria-labelledby="vs-title">
+    <div class="wrap">
+      <div class="head center" data-reveal>
+        <p class="tag">Comparison</p>
+        <h2 class="title" id="vs-title">Docubase vs. the usual options</h2>
+        <p class="lede">Keep the speed of a static site and the features of a docs platform, without the bill.</p>
+      </div>
+      <div class="compare-scroll" data-reveal>
+        <div class="vs" role="table" aria-label="Docubase compared with a hosted docs platform and a hand built static site">
+          <div class="vs-col lab" role="rowgroup">
+            <span class="vh" role="columnheader">Feature</span>
+            <span role="rowheader">Setup</span><span role="rowheader">Search</span><span role="rowheader">AI answers</span><span role="rowheader">Agent access</span><span role="rowheader">Drift checks</span><span role="rowheader">Cost</span><span role="rowheader">Your content</span>
+          </div>
+          <div class="vs-col other" role="rowgroup">
+            <span class="vh" role="columnheader">Hosted platform</span>
+            <span role="cell">Sign up, then import</span><span role="cell">Their service</span><span role="cell">Metered credits</span><span role="cell">Sometimes</span><span role="cell">Rarely</span><span role="cell">Per seat, per month</span><span role="cell">In their editor</span>
+          </div>
+          <div class="vs-col us" role="rowgroup">
+            <span class="vh" role="columnheader"><span class="brand"><span class="mark" aria-hidden="true"><i></i><i></i><i></i></span>docubase</span></span>
+            <span role="cell">One command</span><span role="cell">Built in, offline</span><span role="cell">Your own key</span><span role="cell">llms.txt and MCP</span><span role="cell">In CI, on every PR</span><span role="cell">Free, MIT licensed</span><span role="cell">Markdown in your repo</span>
+          </div>
+          <div class="vs-col other" role="rowgroup">
+            <span class="vh" role="columnheader">Hand built site</span>
+            <span role="cell">Days of theming</span><span role="cell">Add a plugin</span><span role="cell">Build it yourself</span><span role="cell">Build it yourself</span><span role="cell">None</span><span role="cell">Your time</span><span role="cell">In your repo</span>
           </div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- Statement: words fill in as you scroll -->
-  <section class="statement" data-progress aria-label="What Docubase is not">
-    <p class="statement-text" data-words>No account to make. No credits to buy. No framework to learn. Just Markdown, one command, and pages your readers will thank you for.</p>
+  <!-- Feature rail -->
+  <section class="panel" aria-labelledby="rail-title">
+    <div class="wrap">
+      <div class="head" data-reveal>
+        <p class="tag">Features</p>
+        <h2 class="title" id="rail-title">Everything a docs team needs, <br>in one folder</h2>
+        <p class="lede">We did the plumbing so you can write. Nothing here needs a config file to switch on.</p>
+      </div>
+      <div class="rail" data-rail tabindex="0" aria-label="Features">
+        <article data-reveal>
+          <div class="viz" aria-hidden="true"><div class="v-ask"><p class="q">How do I deploy under /docs?</p><p class="a">Set <b>base</b> to <b>/docs/</b> in docubase.config.json, then build. Links and assets follow it</p></div></div>
+          <h3>Ask AI on your key</h3><p>Streams answers drawn from your pages, with sources. Your key, your bill, no credits.</p>
+        </article>
+        <article data-reveal style="--rd:1">
+          <div class="viz" aria-hidden="true"><div class="v-mcp"><span class="k">→ search_docs</span> "custom domains"<br><span class="o">← Managed hosting › Custom domains</span><br><span class="k">→ get_page</span> guides/managed-hosting<br><span class="o">← # Managed hosting …</span></div></div>
+          <h3>MCP server</h3><p>Agents call search_docs and get_page instead of guessing from the open web.</p>
+        </article>
+        <article data-reveal style="--rd:2">
+          <div class="viz" aria-hidden="true"><div class="v-api"><div class="row"><span class="m">GET</span>/tasks/{id}</div><div class="row"><span class="k">id</span>task_42</div><span class="send">Send request</span><div class="row"><span class="ok">200 OK</span><span class="k">· 38 ms</span></div></div></div>
+          <h3>OpenAPI reference</h3><p>A page per endpoint, generated from your spec, with a Try it form that calls your API.</p>
+        </article>
+        <article data-reveal style="--rd:3">
+          <div class="viz" aria-hidden="true"><div class="v-drift"><div><span class="x">✕</span>--legacy flag removed</div><div><span class="w">!</span>scripts/seed.js missing</div><div><span class="y">✓</span>42 pages checked</div></div></div>
+          <h3>Drift checks</h3><p>The pull request fails when a page names a file, flag, script or endpoint that is gone.</p>
+        </article>
+        <article data-reveal style="--rd:4">
+          <div class="viz" aria-hidden="true"><div class="v-tree"><b>Guides</b><span>Getting started</span><span class="on">Deploying</span><span>AI and agents</span><b>Reference</b><span>Configuration</span></div></div>
+          <h3>Folders become the sidebar</h3><p>Order with a number prefix or frontmatter. Links, anchors and images are checked at build.</p>
+        </article>
+        <article data-reveal style="--rd:5">
+          <div class="viz" aria-hidden="true"><div class="v-feed"><div><small>Nov 19</small>Catching docs that quietly went stale</div><div><small>Nov 13</small>Answers that arrive as they are written</div></div></div>
+          <h3>Blog mode</h3><p>Dated posts, reading time and an Atom feed. This site's journal is built with it.</p>
+        </article>
+      </div>
+      <div class="rail-foot">
+        <a class="btn btn-dark" href="/docs/" data-magnetic>Read the docs{{arrow}}</a>
+        <div class="rail-btns">
+          <button type="button" data-rail-prev aria-label="Previous features"><svg viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></svg></button>
+          <button type="button" data-rail-next aria-label="Next features"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+        </div>
+      </div>
+    </div>
   </section>
 
-  <!-- Features with small live demos -->
-  <section class="features" aria-labelledby="features-title">
-    <div class="section-head" data-reveal>
-      <p class="eyebrow">Everything included</p>
-      <h2 class="section-title" id="features-title">Built for the people who read docs, <em>and the agents that do.</em></h2>
+  <!-- Steps -->
+  <section class="sec" aria-labelledby="steps-title">
+    <div class="wrap">
+      <div class="head center" data-reveal>
+        <p class="tag">How it works</p>
+        <h2 class="title" id="steps-title">Live docs in three simple steps</h2>
+        <p class="lede">From a folder of notes to a site people can search, in the time it takes to read this page.</p>
+      </div>
+      <div class="steps">
+        <article class="step" data-reveal><span class="n">01</span><h3>Write</h3><p>Plain Markdown in a folder, with callouts, tabs and code blocks when you need them.</p></article>
+        <div class="buildlog" data-reveal style="--rd:1" data-buildlog aria-hidden="true">
+          <div class="bl-h"><i></i><i></i><i></i></div>
+          <p><span class="p">$</span> npx docubase build docs</p>
+          <p>  reading 42 pages</p>
+          <p>  checking links and anchors</p>
+          <p>  building the search index</p>
+          <p>  writing llms.txt and MCP snapshot</p>
+          <p><span class="g">✓</span> built in 1.4 s → dist/</p>
+          <p><span class="p">$</span> git push</p>
+          <p><span class="g">✓</span> live at docs.example.com</p>
+        </div>
+        <article class="step" data-reveal style="--rd:2"><span class="n">02</span><h3>Build</h3><p>Folders become the sidebar. Every page gets search, contents, dark mode and a Markdown copy.</p></article>
+        <article class="step" data-reveal style="--rd:3"><span class="n">03</span><h3>Ship</h3><p>Static output for any host, a Docker image, or hosting that rebuilds on every push.</p></article>
+      </div>
     </div>
-    <div class="bento">
-      <article class="card c-search" data-reveal data-demo="search">
-        <div class="demo demo-search" aria-hidden="true">
-          <div class="ds-input"><span class="ds-q" data-q></span><span class="caret"></span></div>
-          <ul class="ds-results">
-            <li><b>Deploying</b> <i>Guides</i><span>Ship the site to any static host…</span></li>
-            <li><b>Deploying › Docker</b> <i>Guides</i><span>Run the image and open port 8080…</span></li>
-            <li><b>Self hosting</b> <i>Guides</i><span>One container serves the site…</span></li>
+  </section>
+
+  <!-- Tabs -->
+  <section class="panel" aria-labelledby="tabs-title">
+    <div class="wrap">
+      <div class="head center" data-reveal>
+        <p class="tag">Built for each stage</p>
+        <h2 class="title" id="tabs-title">From the first page <br>to the thousandth reader</h2>
+      </div>
+      <div class="tabs" role="tablist" aria-label="Stages" data-tabs data-reveal>
+        <button type="button" role="tab" id="tab-write" aria-controls="tp-write" aria-selected="true">Writing</button>
+        <button type="button" role="tab" id="tab-search" aria-controls="tp-search" aria-selected="false" tabindex="-1">Search</button>
+        <button type="button" role="tab" id="tab-agents" aria-controls="tp-agents" aria-selected="false" tabindex="-1">Agents</button>
+        <button type="button" role="tab" id="tab-host" aria-controls="tp-host" aria-selected="false" tabindex="-1">Hosting</button>
+      </div>
+      <div data-reveal>
+        <div class="tabpanel" role="tabpanel" id="tp-write" aria-labelledby="tab-write">
+          <div class="tp-copy">
+            <h3>Write Markdown. Get a designed page.</h3>
+            <p>Callouts, tabs and highlighted code are plain Markdown. The dev server reloads the page on every save.</p>
+            <a class="btn btn-accent btn-sm" href="/docs/guides/writing/" data-magnetic>Markdown reference{{arrow}}</a>
+            <div class="tp-stat"><b>0</b><span>config files needed to start</span></div>
+          </div>
+          <div class="tp-viz" aria-hidden="true"><pre class="md"><span class="h"># Deploying</span>
+
+<span class="d">Docubase builds a static site.</span>
+
+<span class="c">:::warning[Before you deploy]</span>
+Set <span class="h">base</span> when you host under a path.
+<span class="c">:::</span>
+
+<span class="c">::::tabs</span>
+<span class="c">:::tab[npm]</span>
+npx docubase build docs
+<span class="c">:::</span>
+<span class="c">::::</span></pre></div>
+        </div>
+        <div class="tabpanel" role="tabpanel" id="tp-search" aria-labelledby="tab-search" hidden>
+          <div class="tp-copy">
+            <h3>Search that ships with the site</h3>
+            <p>Every heading becomes an entry in an index built at build time. It runs in the browser, so it is instant and works offline.</p>
+            <a class="btn btn-accent btn-sm" href="/docs/getting-started/" data-magnetic>Try it in the docs{{arrow}}</a>
+            <div class="tp-stat"><b>0</b><span>search services to sign up for</span></div>
+          </div>
+          <div class="tp-viz" aria-hidden="true"><div class="demo"><div class="sb-input"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><span>webhook secret</span><kbd>⌘K</kbd></div><ul class="sb-results"><li><span class="h">#</span><div><b>Managed hosting › Add a site</b><small>Section match</small></div><i>Guides</i></li><li><span class="h">#</span><div><b>Managed hosting › Admin API</b><small>Section match</small></div><i>Guides</i></li><li><span class="h">#</span><div><b>Self hosting › Docker</b><small>Section match</small></div><i>Guides</i></li></ul></div></div>
+        </div>
+        <div class="tabpanel" role="tabpanel" id="tp-agents" aria-labelledby="tab-agents" hidden>
+          <div class="tp-copy">
+            <h3>Agents read the same docs as people</h3>
+            <p>Each page is also published as Markdown, with llms.txt beside it and an MCP server that searches and reads your docs.</p>
+            <a class="btn btn-accent btn-sm" href="/docs/guides/ai-and-agents/" data-magnetic>Connect an agent{{arrow}}</a>
+            <div class="tp-stat"><b>3</b><span>MCP tools: search, get page, list pages</span></div>
+          </div>
+          <div class="tp-viz term" aria-hidden="true" data-term><p class="t-head"><span></span><span></span><span></span>mcp · docubase</p><pre data-term-body></pre></div>
+        </div>
+        <div class="tabpanel" role="tabpanel" id="tp-host" aria-labelledby="tab-host" hidden>
+          <div class="tp-copy">
+            <h3>Push to git. The site follows.</h3>
+            <p>Connect a repository and every push rebuilds your docs, with build logs, custom domains and hosted MCP in the dashboard.</p>
+            <a class="btn btn-accent btn-sm" href="/docs/guides/managed-hosting/" data-magnetic>About hosting{{arrow}}</a>
+            <div class="tp-stat"><b>1</b><span>site free, forever</span></div>
+          </div>
+          <div class="tp-viz" aria-hidden="true"><ul class="deploys"><li class="run"><i></i>main · <code>a481b55</code><small>building</small></li><li><i></i>main · <code>e539be1</code><small>1.4 s</small></li><li><i></i>main · <code>3d67d08</code><small>1.2 s</small></li><li><i></i>docs.example.com<small>DNS verified</small></li></ul></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Edge: drift -->
+  <section class="sec" aria-labelledby="edge-title">
+    <div class="wrap edge">
+      <div class="edge-viz" data-reveal>
+        <canvas class="dots" data-dots="edge" aria-hidden="true"></canvas>
+        <div class="check" aria-hidden="true">
+          <p class="check-h"><i>✕</i>docubase check<small>2 problems</small></p>
+          <ul>
+            <li><span class="x">✕</span> <b>guides/deploying.md</b> mentions <b>--legacy</b>, which no longer exists</li>
+            <li><span class="x">✕</span> <b>reference/cli.md</b> links to <b>scripts/seed.js</b>, which was deleted</li>
           </ul>
         </div>
-        <h3>Search that works offline</h3>
-        <p>Every section is indexed when you build. Results appear as you type, with no search service to pay for.</p>
-      </article>
-
-      <article class="card c-ask" data-reveal data-demo="ask">
-        <div class="demo demo-ask" aria-hidden="true">
-          <p class="da-q">How do I deploy to a subfolder?</p>
-          <p class="da-a" data-a></p>
-          <p class="da-src"><span>Deploying › Base path</span><span>Configuration</span></p>
-        </div>
-        <h3>Ask AI, on your own key</h3>
-        <p>Answers stream from your docs through Anthropic or any OpenAI compatible model. Closing the dialog stops the bill.</p>
-      </article>
-
-      <article class="card c-drift" data-reveal data-demo="drift">
-        <div class="demo demo-term" aria-hidden="true">
-          <p><span class="t-dim">$</span> docubase check docs</p>
-          <p class="t-line">docs/deploy.md</p>
-          <p class="t-line">&nbsp;&nbsp;12 <span class="t-err">error</span> missing-flag &nbsp;--legacy</p>
-          <p class="t-line">&nbsp;&nbsp;31 <span class="t-warn">warn</span>&nbsp; stale &nbsp;src/server.js changed</p>
-          <p class="t-line t-dim">Checked 24 pages: 1 error, 1 warning.</p>
-        </div>
-        <h3>Catch docs that went stale</h3>
-        <p>A check reads your docs and your code together, and fails the pull request when a page mentions something that is gone.</p>
-      </article>
-
-      <article class="card c-agents" data-reveal data-demo="agents">
-        <div class="demo demo-mcp" aria-hidden="true">
-          <p class="m-out"><span>→</span> tools/call <b>search_docs</b> {"query":"webhooks"}</p>
-          <p class="m-in"><span>←</span> 1. Managed hosting › Add a site <i>path: guides/managed-hosting</i></p>
-          <p class="m-out"><span>→</span> tools/call <b>get_page</b> {"path":"guides/managed-hosting"}</p>
-          <p class="m-in"><span>←</span> # Managed hosting …</p>
-        </div>
-        <h3>Readable by coding agents</h3>
-        <p>Every page as Markdown, <code>llms.txt</code> beside it, and an MCP server, locally or over HTTP.</p>
-      </article>
-
-      <article class="card c-api" data-reveal data-demo="api">
-        <div class="demo demo-api" aria-hidden="true">
-          <p class="a-req"><b>GET</b> /tasks</p>
-          <p class="a-status" data-status>Send request</p>
-          <pre class="a-body" data-body></pre>
-        </div>
-        <h3>API reference with Try it</h3>
-        <p>Point it at an OpenAPI file and get reference pages with a request form for every endpoint.</p>
-      </article>
-
-      <article class="card c-host" data-reveal data-demo="host">
-        <div class="demo demo-host" aria-hidden="true">
-          <div class="h-track"><span class="h-dot"></span></div>
-          <ol class="h-steps"><li>git push</li><li>Built in 41 s</li><li>Live at acme.docs.dev</li></ol>
-        </div>
-        <h3>Hosting from git, or on your own server</h3>
-        <p>A push rebuilds the site. Custom domains, a dashboard and the assistant per site. Or run the same server yourself.</p>
-      </article>
-    </div>
-  </section>
-
-  <!-- Three steps -->
-  <section class="steps" aria-labelledby="steps-title">
-    <h2 class="visually-hidden" id="steps-title">Three steps</h2>
-    <ol class="steps-list">
-      <li data-reveal><span class="step-n">i.</span><h3>Write</h3><p>Markdown in a folder. Folders become the sidebar, frontmatter sets the order.</p></li>
-      <li data-reveal style="--rd:1"><span class="step-n">ii.</span><h3>Run</h3><p><code>npx docubase build</code> writes plain HTML, CSS and a little JavaScript.</p></li>
-      <li data-reveal style="--rd:2"><span class="step-n">iii.</span><h3>Publish</h3><p>Any static host, a Docker container, or hosting that rebuilds on every push.</p></li>
-    </ol>
-  </section>
-
-  <!-- Open source or hosted -->
-  <section class="paths" aria-labelledby="paths-title">
-    <div class="section-head" data-reveal>
-      <p class="eyebrow">Two ways to run it</p>
-      <h2 class="section-title" id="paths-title">The same code, <em>wherever you like.</em></h2>
-    </div>
-    <div class="paths-grid">
-      <a class="path path-oss" href="/docs/guides/self-hosting/" data-reveal>
-        <p class="path-k">Open source</p>
-        <p class="path-t">Free, forever.</p>
-        <p class="path-d">MIT licensed. Build on your laptop, in CI, or in a Docker container. Nothing phones home.</p>
-        <span class="path-go">Self hosting guide <span aria-hidden="true">→</span></span>
-      </a>
-      <a class="path path-host" href="/pricing/" data-reveal style="--rd:1">
-        <p class="path-k">Hosted</p>
-        <p class="path-t">From git, in a minute.</p>
-        <p class="path-d">Connect a repository and get a site at your own name, rebuilt on every push, with Ask AI and custom domains on Pro.</p>
-        <span class="path-go">See pricing <span aria-hidden="true">→</span></span>
-      </a>
-    </div>
-  </section>
-
-  <!-- Latest posts, filled in at build time from the journal -->
-  <section class="journal" aria-labelledby="journal-title">
-    <div class="section-head section-head-row" data-reveal>
-      <div>
-        <p class="eyebrow">From the journal</p>
-        <h2 class="section-title" id="journal-title">Notes from the workshop.</h2>
       </div>
-      <a class="link-arrow" href="/blog/">All posts <span aria-hidden="true">→</span></a>
+      <div class="edge-copy" data-reveal style="--rd:1">
+        <p class="tag">The Docubase edge</p>
+        <h2 class="title" id="edge-title">Docs that keep up with your code</h2>
+        <p class="lede">Most docs go stale quietly. Docubase checks every page against your repository and fails the pull request that breaks them.</p>
+        <ul class="ticks">
+          <li><span class="ico"><svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 3-6.2"/><path d="M4 4v4h4"/></svg></span>Files, flags, scripts and endpoints, checked</li>
+          <li><span class="ico"><svg viewBox="0 0 24 24"><path d="m5 12 5 5 9-10"/></svg></span>A GitHub Action that runs on every pull request</li>
+          <li><span class="ico"><svg viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 6 0l3-3a4 4 0 0 0-6-6l-1 1M14 10a4 4 0 0 0-6 0l-3 3a4 4 0 0 0 6 6l1-1"/></svg></span>Broken links and anchors stop the build</li>
+          <li><span class="ico"><svg viewBox="0 0 24 24"><path d="M12 3v18M3 12h18"/></svg></span>Ignore lists for names that are only examples</li>
+        </ul>
+        <a class="btn btn-dark" href="/docs/guides/drift-detection/" data-magnetic>How drift checks work{{arrow}}</a>
+      </div>
     </div>
-    <ol class="journal-list">
+  </section>
+
+  <!-- Journal -->
+  <section class="sec" style="padding-top:0" aria-labelledby="journal-title">
+    <div class="wrap">
+      <div class="head-row" data-reveal>
+        <div class="head"><p class="tag">Journal</p><h2 class="title" id="journal-title">Notes from the workshop</h2></div>
+        <a class="btn btn-line" href="/blog/">All posts{{arrow}}</a>
+      </div>
+      <ol class="posts">
 {{posts}}
-    </ol>
+      </ol>
+    </div>
   </section>
 
-  <!-- Closing call to action on a second sky -->
-  <section class="closer" aria-labelledby="closer-title">
-    <div class="closer-sky" data-reveal>
-      <div class="grain" aria-hidden="true"></div>
-      <h2 class="closer-title" id="closer-title">Start <em>writing.</em></h2>
-      <p class="closer-lede">One command, no account. Your docs are a folder of Markdown away.</p>
-      <div class="hero-actions closer-actions">
-        <button class="cmd" type="button" data-copy="npx docubase dev docs" aria-label="Copy the command npx docubase dev docs">
-          <span class="cmd-prompt" aria-hidden="true">$</span><code>npx docubase dev docs</code><span class="cmd-hint" data-copy-label>Copy</span>
-        </button>
-        <a class="btn btn-primary btn-lg" href="/docs/" data-magnetic>Browse the docs</a>
+  <!-- Pricing -->
+  <section class="panel" aria-labelledby="pricing-title">
+    <div class="wrap">
+      <div class="head center" data-reveal>
+        <p class="tag">Pricing</p>
+        <h2 class="title" id="pricing-title">Simple, honest pricing</h2>
+        <p class="lede">The generator is free and always will be. Pay only if you want us to build and serve your docs.</p>
       </div>
+{{plans}}
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="sec" aria-labelledby="faq-title">
+    <div class="wrap faq">
+      <div class="faq-head" data-reveal>
+        <p class="tag">FAQ</p>
+        <h2 class="title" id="faq-title">The answers you need before you start</h2>
+        <p class="lede">Anything else is in the docs, which are, of course, built with Docubase.</p>
+        <a class="btn btn-accent" href="/docs/" data-magnetic>Read the docs{{arrow}}</a>
+      </div>
+{{faq}}
+    </div>
+  </section>
+
+  <!-- Closing stage -->
+  <section class="stage cta" aria-labelledby="closer-title">
+    <canvas class="dots" data-dots="cta" aria-hidden="true"></canvas>
+    <h2 id="closer-title" data-reveal>Your docs are <span class="accent">one command</span> away</h2>
+    <p class="hero-lede" data-reveal style="--rd:1">No account, no credits. Start with a folder of Markdown.</p>
+    <div class="actions" data-reveal style="--rd:2">
+      <a class="btn btn-accent" href="/docs/getting-started/" data-magnetic>Get started free{{arrow}}</a>
+      <a class="btn btn-glass" href="/pricing/">See pricing{{arrow}}</a>
     </div>
   </section>
 </main>

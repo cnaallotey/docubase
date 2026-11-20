@@ -1,0 +1,39 @@
+      <div class="plans">
+        <article class="plan" data-reveal>
+          <p class="plan-k">Open source</p>
+          <p class="plan-price">$0<small>forever</small></p>
+          <p class="plan-desc">Everything Docubase does, on your own machine, CI or server.</p>
+          <a class="btn btn-line" href="/docs/getting-started/">Get started{{arrow}}</a>
+          <ul>
+            <li>Unlimited sites and pages</li>
+            <li>Search, llms.txt and MCP</li>
+            <li>Ask AI on your own key</li>
+            <li>Drift checks and the GitHub Action</li>
+            <li>Docker image and the hosting server</li>
+          </ul>
+        </article>
+        <article class="plan" data-reveal style="--rd:1">
+          <p class="plan-k">Hosted</p>
+          <p class="plan-price">$0<small>for one site</small></p>
+          <p class="plan-desc">Connect a repository and get a site at your own name, rebuilt on every push.</p>
+          <a class="btn btn-line" href="{{dashboardUrl}}">Create an account{{arrow}}</a>
+          <ul>
+            <li>{{freeSites}} site on its own subdomain</li>
+            <li>Builds on every push</li>
+            <li>Search, llms.txt and hosted MCP</li>
+            <li>Build logs in the dashboard</li>
+          </ul>
+        </article>
+        <article class="plan plan-featured" data-reveal style="--rd:2">
+          <p class="plan-k">Pro <span class="tag">For teams</span></p>
+          <p class="plan-price">{{proPrice}}<small>{{proPeriod}}</small></p>
+          <p class="plan-desc">For teams whose docs are part of the product.</p>
+          <a class="btn btn-accent" href="{{dashboardUrl}}" data-magnetic>Start with Pro{{arrow}}</a>
+          <ul>
+            <li>{{proSites}} sites</li>
+            <li>Custom domains, verified by DNS</li>
+            <li>Ask AI on every site, with your key</li>
+            <li>Everything in Hosted</li>
+          </ul>
+        </article>
+      </div>

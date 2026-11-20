@@ -51,10 +51,17 @@ The build writes `_headers` (a strict content security policy, long caching for 
 
 Add a Markdown file under `site/blog/posts` with a `title`, `description` and `date`. The three newest posts also appear on the home page.
 
+## The look
+
+A white page with black stage cards, cream panels, Geist type and one electric yellow accent (`--accent` in `assets/site.css`).
+
+* **Dot fields.** Each stage holds a `<canvas data-dots="hero|page|cta|edge">`. `assets/scene.js` (raw WebGL, no library) draws a grid of square dots on a plane in perspective, lifted by travelling waves, with a brighter ribbon running diagonally through it. Crests turn yellow and the pointer lights the dots under it. The variant picks the ribbon's path and the camera.
+* **Shared blocks.** `src/_plans.html` and `src/_faq.html` are used by both the home page and pricing. `{{arrow}}` is the round arrow inside buttons.
+* **Docs and journal.** Docubase builds them with its own theme. The site build then adds `assets/docs-skin.css` to every one of those pages, after the theme, so they get the same type, colours, pill top bar and a black stage on each start page. The skin covers light and dark.
+
 ## How the motion stays fast
 
-* No framework and no animation library. `assets/site.js` is about 17 KB before compression.
-* Motion uses `transform`, `opacity` and one `clip-path`. Scroll scenes are driven by a single `requestAnimationFrame` loop that only runs while a scene is on screen.
-* The sky is a small WebGL shader drawn at half resolution or less. It pauses when off screen or in a background tab, and lowers its resolution if frames take too long.
-* Fonts are bundled and preloaded. There are no images, so nothing shifts while loading.
-* With reduced motion turned on, everything is shown in its final state and nothing moves.
+* No framework, no 3D library and no images. `scene.js` is about 10 KB and `site.js` about 13 KB before compression.
+* Each dot field is one draw call with all the motion in the vertex shader. A field only draws while it is on screen and the tab is visible, and it lowers its resolution if frames take too long.
+* Page motion uses `transform`, `opacity` and `filter`. Loops in the page (the search demo, the build log, the MCP terminal) stop when they are off screen.
+* Without WebGL the stages stay black and the page reads normally. With reduced motion turned on, each field draws one still frame and nothing else moves.

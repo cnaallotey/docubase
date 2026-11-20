@@ -9,7 +9,8 @@ import { copyFile, mkdir, readdir, readFile, rm, stat, writeFile } from 'node:fs
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { loadSite } from '../packages/core/src/index.js';
-import { build, FONT_FILES, fontSource } from '../packages/docubase/src/build.js';
+import { createRequire } from 'node:module';
+import { build } from '../packages/docubase/src/build.js';
 import { formatDate } from '../packages/docubase/src/render.js';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -39,18 +40,27 @@ await rm(out, { recursive: true, force: true });
 await mkdir(path.join(out, 'assets', 'fonts'), { recursive: true });
 
 // ---- Assets: fingerprinted so they can be cached forever ----------------------------------------------
-// The marketing pages use the same bundled serif as the docs theme. Its @font-face rules lead the stylesheet.
-const fontCss = FONT_FILES.filter((f) => !f.includes('latin-ext')).map((file) => {
-  const [, weight, style] = /-(\d00)-(normal|italic)\./.exec(file);
-  return `@font-face{font-family:"EB Garamond";font-style:${style};font-weight:${weight};font-display:swap;src:url(/assets/fonts/${file}) format("woff2")}`;
-}).join('\n');
+// The marketing pages use Geist and Geist Mono, both SIL Open Font License,
+// self-hosted from their npm packages so the site makes no requests to other servers.
+const require = createRequire(import.meta.url);
+const FONTS = [
+  ['geist', 'Geist', 400, 'normal'],
+  ['geist', 'Geist', 500, 'normal'],
+  ['geist', 'Geist', 600, 'normal'],
+  ['geist-mono', 'Geist Mono', 400, 'normal'],
+  ['geist-mono', 'Geist Mono', 500, 'normal'],
+].map(([pkg, family, weight, style]) => ({ pkg, family, weight, style, file: `${pkg}-latin-${weight}-${style}.woff2` }));
+const fontCss = FONTS.map((f) => `@font-face{font-family:"${f.family}";font-style:${f.style};font-weight:${f.weight};font-display:swap;src:url(/assets/fonts/${f.file}) format("woff2")}`).join('\n');
 const css = Buffer.from(`${fontCss}\n${await readFile(path.join(src, 'assets', 'site.css'), 'utf8')}`);
 const js = await readFile(path.join(src, 'assets', 'site.js'));
+const scene = await readFile(path.join(src, 'assets', 'scene.js'));
 const cssName = `site.${sha(css)}.css`;
 const jsName = `site.${sha(js)}.js`;
+const sceneName = `scene.${sha(scene)}.js`;
 await writeFile(path.join(out, 'assets', cssName), css);
 await writeFile(path.join(out, 'assets', jsName), js);
-for (const file of FONT_FILES) await copyFile(fontSource(file), path.join(out, 'assets', 'fonts', file));
+await writeFile(path.join(out, 'assets', sceneName), scene);
+for (const f of FONTS) await copyFile(path.join(path.dirname(require.resolve(`@fontsource/${f.pkg}/package.json`)), 'files', f.file), path.join(out, 'assets', 'fonts', f.file));
 
 // ---- Docs and journal, built by Docubase -------------------------------------------------------------
 const topLinks = (skip) => [
@@ -69,29 +79,60 @@ async function buildWithDocubase(dir, base) {
 const docs = await buildWithDocubase(path.join(repo, 'examples', 'docs'), '/docs/');
 const blog = await buildWithDocubase(path.join(here, 'blog'), '/blog/');
 
+// Dress the docs and journal like the rest of the site: a skin loaded after the Docubase theme, with
+// Geist preloaded in place of the theme's serif.
+const skin = Buffer.from(`${fontCss}\n${await readFile(path.join(src, 'assets', 'docs-skin.css'), 'utf8')}`);
+const skinName = `docs-skin.${sha(skin)}.css`;
+await writeFile(path.join(out, 'assets', skinName), skin);
+async function htmlFiles(dir) {
+  const found = [];
+  for (const entry of await readdir(dir, { withFileTypes: true })) {
+    const full = path.join(dir, entry.name);
+    if (entry.isDirectory()) found.push(...(await htmlFiles(full)));
+    else if (entry.name.endsWith('.html')) found.push(full);
+  }
+  return found;
+}
+for (const dir of ['docs', 'blog']) {
+  for (const file of await htmlFiles(path.join(out, dir))) {
+    let html = await readFile(file, 'utf8');
+    html = html.replace(/<link rel="preload" href="[^"]*eb-garamond[^"]*"[^>]*>/, '<link rel="preload" href="/assets/fonts/geist-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>');
+    const withSkin = html.replace(/(<style>:root\{--accent:[^<]*<\/style>)/, `$1\n<link rel="stylesheet" href="/assets/${skinName}">`);
+    if (withSkin === html) throw new Error(`could not add the skin to ${path.relative(out, file)}`);
+    await writeFile(file, withSkin);
+  }
+}
+
 // ---- Marketing pages ---------------------------------------------------------------------------------
 const header = await readFile(path.join(src, '_header.html'), 'utf8');
 const footer = await readFile(path.join(src, '_footer.html'), 'utf8');
 const github = githubUrl ? `<a href="${esc(githubUrl)}" rel="noopener noreferrer">GitHub</a>` : '';
 const githubFooter = githubUrl ? `<a href="${esc(githubUrl)}" rel="noopener noreferrer">Source on GitHub</a>` : '';
 
-const posts = blog.site.blog.posts.slice(0, 3).map((post, i) => `      <li data-reveal style="--rd:${i}"><a href="${esc(post.url)}">
-        <time datetime="${esc(post.date)}">${esc(formatDate(post.date, 'en'))}</time>
-        <span class="j-title">${esc(post.title)}</span>
-        <span class="j-more">${esc(post.readingMinutes)} min read</span>
-      </a></li>`).join('\n');
+const arrow = '<span class="bi" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>';
+const posts = blog.site.blog.posts.slice(0, 3).map((post, i) => `        <li data-reveal style="--rd:${i}"><a href="${esc(post.url)}">
+          <time datetime="${esc(post.date)}">${esc(formatDate(post.date, 'en'))}</time>
+          <span class="p-title">${esc(post.title)}</span>
+          <span class="p-more">${esc(post.readingMinutes)} min read${arrow}</span>
+        </a></li>`).join('\n');
+const plans = await readFile(path.join(src, '_plans.html'), 'utf8');
+const faq = await readFile(path.join(src, '_faq.html'), 'utf8');
 
 const values = {
   head: [
-    `<link rel="preload" href="/assets/fonts/eb-garamond-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>`,
+    `<link rel="preload" href="/assets/fonts/geist-latin-600-normal.woff2" as="font" type="font/woff2" crossorigin>`,
+    `<link rel="preload" href="/assets/fonts/geist-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>`,
     `<link rel="stylesheet" href="/assets/${cssName}">`,
     `<link rel="alternate" type="application/atom+xml" title="Docubase Journal" href="/blog/feed.xml">`,
-    `<link rel="icon" href="data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><circle cx="32" cy="32" r="32" fill="#2f5d46"/><text x="32" y="45" font-family="Georgia,serif" font-size="38" text-anchor="middle" fill="#fff">D</text></svg>')}">`,
+    `<link rel="icon" href="data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="18" fill="#050506"/><g fill="#fbff54"><rect x="29" y="14" width="6" height="36" rx="3"/><rect x="29" y="14" width="6" height="36" rx="3" transform="rotate(60 32 32)"/><rect x="29" y="14" width="6" height="36" rx="3" transform="rotate(-60 32 32)"/></g></svg>')}">`,
   ].join('\n'),
-  scripts: `<script src="/assets/${jsName}" defer></script>`,
+  scripts: `<script src="/assets/${jsName}" defer></script>\n<script src="/assets/${sceneName}" defer></script>`,
   header: header.replaceAll('{{github}}', github),
   footer: footer.replace('{{githubFooter}}', githubFooter),
   posts,
+  plans,
+  faq,
+  arrow,
   dashboardUrl: esc(dashboardUrl),
   proPrice: esc(config.plans.proPrice),
   proPeriod: esc(config.plans.proPeriod),
@@ -182,6 +223,7 @@ await writeFile(path.join(out, MARKER), 'Created by site/build.mjs. This folder 
 // ---- Report -------------------------------------------------------------------------------------------
 const kb = async (rel) => ((await stat(path.join(out, rel))).size / 1024).toFixed(1);
 console.log(`Built ${siteUrl} into site/dist in ${Date.now() - started} ms`);
-console.log(`  marketing: ${htmlPages.length} pages, index.html ${await kb('index.html')} KB, ${cssName} ${await kb(`assets/${cssName}`)} KB, ${jsName} ${await kb(`assets/${jsName}`)} KB`);
+console.log(`  marketing: ${htmlPages.length} pages, index.html ${await kb('index.html')} KB, ${cssName} ${await kb(`assets/${cssName}`)} KB, ${jsName} ${await kb(`assets/${jsName}`)} KB, ${sceneName} ${await kb(`assets/${sceneName}`)} KB`);
 console.log(`  docs:      ${docs.result.pages} pages at /docs/`);
+console.log(`  skin:      ${skinName} on every docs and journal page`);
 console.log(`  journal:   ${blog.result.pages} pages at /blog/, ${blog.site.blog.posts.length} posts, feed at /blog/feed.xml`);
