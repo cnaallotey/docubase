@@ -26,15 +26,19 @@ npm run preview:site   # serves it at http://127.0.0.1:8788
 
 The Pro price in this file is a placeholder. Set the real one before launch.
 
-## Deploy to Cloudflare Pages
+## Deploy to Cloudflare
 
-With Git: create a Pages project from this repository with
+The site is a Worker with static assets (`wrangler.toml` at the repository root), so `_headers`, `_redirects` and the 404 page work as written.
+
+With Git, in Workers and Pages, import this repository and set:
 
 * Build command: `npm ci && npm run build:site`
-* Build output directory: `site/dist`
-* Environment variable: `SITE_URL=https://your-domain` and `NODE_VERSION=22`
+* Deploy command: `npx wrangler deploy`
+* Path: `/`
+* API token: create a new one for this project. It needs the Workers Scripts and artifacts permissions, which the token creator in that form adds for you
+* Variables: `SITE_URL=https://your-domain` and `NODE_VERSION=22`
 
-From your machine, with `wrangler.toml` at the repository root:
+From your machine:
 
 ```bash
 npx wrangler login

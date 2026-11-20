@@ -1,6 +1,11 @@
-# Cloudflare Pages project for the Docubase website (marketing pages, /docs/ and /blog/).
-# Build:  npm run build:site      Output: site/dist
-# Deploy: npx wrangler pages deploy
+# Cloudflare Worker serving the Docubase website (marketing pages, /docs/ and /blog/) as static assets.
+# Build:  npm ci && npm run build:site      Output: site/dist
+# Deploy: npx wrangler deploy
+# _headers and _redirects in site/dist are applied by Cloudflare. Unknown paths get the nearest 404.html.
 name = "docubase-site"
-pages_build_output_dir = "site/dist"
 compatibility_date = "2025-11-01"
+
+[assets]
+directory = "./site/dist"
+not_found_handling = "404-page"
+html_handling = "auto-trailing-slash"

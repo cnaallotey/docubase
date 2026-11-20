@@ -19,7 +19,7 @@
     "playground:host": "npm run host --prefix examples/playground",
     "build:site": "node site/build.mjs",
     "preview:site": "node site/serve.mjs",
-    "deploy:site": "npm run build:site && npx wrangler pages deploy"
+    "deploy:site": "npm run build:site && npx wrangler deploy"
   },
   "engines": {
     "node": ">=20"
