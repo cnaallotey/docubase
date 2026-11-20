@@ -2,6 +2,23 @@
   "name": "@docubase/core",
   "version": "0.1.0",
   "description": "Framework agnostic content pipeline for Docubase: reads a docs folder and returns pages, navigation and a search index.",
+  "keywords": [
+    "docs",
+    "documentation",
+    "markdown",
+    "search",
+    "static-site"
+  ],
+  "homepage": "https://docubase.clientra.tech/docs/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cnaallotey/docubase.git",
+    "directory": "packages/core"
+  },
+  "bugs": {
+    "url": "https://github.com/cnaallotey/docubase/issues"
+  },
+  "author": "Charles Nii Adotey Allotey",
   "license": "MIT",
   "type": "module",
   "main": "./src/index.js",
@@ -33,5 +50,8 @@
   },
   "engines": {
     "node": ">=20"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

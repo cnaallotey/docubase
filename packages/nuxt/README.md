@@ -13,4 +13,4 @@ export default defineNuxtConfig({
 });
 ```
 
-Run `nuxt dev` or `nuxt generate`. Replace `DocubaseLayout`, `DocubaseNav`, `DocubaseToc` or `DocubasePager` by adding a component with the same name to your app. Full guide: `examples/docs/guides/nuxt.md`.
+Run `nuxt dev` or `nuxt generate`. Replace `DocubaseLayout`, `DocubaseNav`, `DocubaseToc` or `DocubasePager` by adding a component with the same name to your app. Full guide: https://docubase.clientra.tech/docs/guides/nuxt/

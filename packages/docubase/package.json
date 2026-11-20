@@ -2,10 +2,31 @@
   "name": "docubase",
   "version": "0.1.0",
   "description": "Open source docs site generator. Run it on a folder of Markdown and get a fast site with search.",
+  "keywords": [
+    "docs",
+    "documentation",
+    "markdown",
+    "static-site-generator",
+    "search",
+    "llms-txt",
+    "mcp",
+    "openapi",
+    "cli"
+  ],
+  "homepage": "https://docubase.clientra.tech/docs/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cnaallotey/docubase.git",
+    "directory": "packages/docubase"
+  },
+  "bugs": {
+    "url": "https://github.com/cnaallotey/docubase/issues"
+  },
+  "author": "Charles Nii Adotey Allotey",
   "license": "MIT",
   "type": "module",
   "bin": {
-    "docubase": "./bin/docubase.js"
+    "docubase": "bin/docubase.js"
   },
   "files": [
     "bin",

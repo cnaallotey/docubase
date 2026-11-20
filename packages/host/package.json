@@ -2,10 +2,27 @@
   "name": "@docubase/host",
   "version": "0.1.0",
   "description": "Managed hosting server for Docubase sites: builds docs from git, serves them by hostname, and runs the assistant per site.",
+  "keywords": [
+    "docs",
+    "documentation",
+    "hosting",
+    "markdown",
+    "self-hosted"
+  ],
+  "homepage": "https://docubase.clientra.tech/docs/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cnaallotey/docubase.git",
+    "directory": "packages/host"
+  },
+  "bugs": {
+    "url": "https://github.com/cnaallotey/docubase/issues"
+  },
+  "author": "Charles Nii Adotey Allotey",
   "license": "MIT",
   "type": "module",
   "bin": {
-    "docubase-host": "./bin/docubase-host.js"
+    "docubase-host": "bin/docubase-host.js"
   },
   "main": "./src/index.js",
   "exports": {
@@ -24,5 +41,8 @@
   },
   "engines": {
     "node": ">=20"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
