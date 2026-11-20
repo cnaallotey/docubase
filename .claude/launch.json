@@ -1,0 +1,81 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "playground-api",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "playground:api"
+      ],
+      "port": 4010
+    },
+    {
+      "name": "playground-docs",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "playground:dev"
+      ],
+      "port": 3001
+    },
+    {
+      "name": "nuxt-generated",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": [
+        "-u",
+        "-m",
+        "http.server",
+        "3002",
+        "--directory",
+        "examples/nuxt/.output/public"
+      ],
+      "port": 3002
+    },
+    {
+      "name": "nuxt-dev",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "dev",
+        "--workspace",
+        "docubase-example-nuxt",
+        "--",
+        "--port",
+        "3003"
+      ],
+      "port": 3003
+    },
+    {
+      "name": "host-dashboard",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "playground:host"
+      ],
+      "port": 8090,
+      "url": "http://app.localhost:8090"
+    },
+    {
+      "name": "example-docs",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "dev:example",
+        "--",
+        "--port",
+        "3006"
+      ],
+      "port": 3006
+    },
+    {
+      "name": "site",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "site/serve.mjs"
+      ],
+      "port": 8788,
+      "url": "http://127.0.0.1:8788"
+    }
+  ]
+}

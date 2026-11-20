@@ -2,7 +2,7 @@
 # Build:  npm ci && npm run build:site      Output: site/dist
 # Deploy: npx wrangler deploy
 # _headers and _redirects in site/dist are applied by Cloudflare. Unknown paths get the nearest 404.html.
-name = "docubase-site"
+name = "docubase"
 compatibility_date = "2025-11-01"
 
 [assets]
