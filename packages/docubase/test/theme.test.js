@@ -71,3 +71,48 @@ test('a bad post date stops the build and names the file', async () => {
   assert.equal(await main(['build', root], { log: { log() {}, warn() {}, error: (m) => errors.push(String(m)) } }), 1);
   assert.match(errors.join('\n'), /post\.md: frontmatter "date" must be a date such as 2026-11-20/);
 });
+
+test('pages carry a canonical URL, Open Graph and X card tags, and structured data', async () => {
+  const root = await mkdtemp(path.join(tmpdir(), 'docubase-seo-'));
+  await writeFile(path.join(root, 'docubase.config.json'), JSON.stringify({ title: 'Docs', siteUrl: 'https://docs.example.com', base: '/docs/', socialImage: '/og/{page}.png', twitter: 'example' }));
+  await writeFile(path.join(root, 'index.md'), '---\ndescription: Start here.\n---\n# Home');
+  await writeFile(path.join(root, 'setup.md'), '---\ndescription: Set it up.\nimage: https://cdn.example.com/setup.png\n---\n# Set "up"');
+  await writeFile(path.join(root, 'plain.md'), '# Plain');
+  assert.equal(await main(['build', root], quiet), 0);
+  const out = path.join(root, 'dist');
+
+  const plain = await readFile(path.join(out, 'plain', 'index.html'), 'utf8');
+  assert.match(plain, /<link rel="canonical" href="https:\/\/docs\.example\.com\/docs\/plain\/">/);
+  assert.match(plain, /<meta property="og:url" content="https:\/\/docs\.example\.com\/docs\/plain\/">/);
+  assert.match(plain, /<meta property="og:image" content="https:\/\/docs\.example\.com\/og\/plain\.png">/);
+  assert.match(plain, /<meta name="twitter:card" content="summary_large_image">/);
+  assert.match(plain, /<meta name="twitter:site" content="@example">/);
+  const ld = JSON.parse(plain.match(/<script type="application\/ld\+json">([^<]*)<\/script>/)[1]);
+  assert.equal(ld['@type'], 'TechArticle');
+  assert.equal(ld.headline, 'Plain');
+  assert.equal(ld.isPartOf.url, 'https://docs.example.com/docs/');
+
+  const setup = await readFile(path.join(out, 'setup', 'index.html'), 'utf8');
+  assert.match(setup, /<meta property="og:image" content="https:\/\/cdn\.example\.com\/setup\.png">/, 'frontmatter image wins');
+  assert.match(setup, /<meta property="og:image:alt" content="Set &quot;up&quot; · Docs">/);
+
+  const home = await readFile(path.join(out, 'index.html'), 'utf8');
+  assert.match(home, /og\/index\.png/);
+  assert.equal(JSON.parse(home.match(/<script type="application\/ld\+json">([^<]*)<\/script>/)[1])['@type'], 'WebSite');
+
+  const missing = await readFile(path.join(out, '404.html'), 'utf8');
+  assert.ok(!missing.includes('rel="canonical"'), 'the not found page has no canonical URL');
+});
+
+test('without a siteUrl there is no canonical URL and relative images are left out', async () => {
+  const root = await mkdtemp(path.join(tmpdir(), 'docubase-seo-'));
+  await writeFile(path.join(root, 'docubase.config.json'), JSON.stringify({ title: 'Docs', socialImage: 'og.png' }));
+  await writeFile(path.join(root, 'index.md'), '# Home');
+  const warnings = [];
+  assert.equal(await main(['build', root], { log: { log() {}, warn: (m) => warnings.push(m), error() {} } }), 0);
+  const home = await readFile(path.join(root, 'dist', 'index.html'), 'utf8');
+  assert.ok(!home.includes('rel="canonical"'));
+  assert.ok(!home.includes('og:image'));
+  assert.match(home, /<meta name="twitter:card" content="summary">/);
+  assert.ok(warnings.some((w) => /siteUrl/.test(String(w))), 'the build warns that siteUrl is needed');
+});

@@ -12,6 +12,7 @@ import { loadSite } from '../packages/core/src/index.js';
 import { createRequire } from 'node:module';
 import { build } from '../packages/docubase/src/build.js';
 import { formatDate } from '../packages/docubase/src/render.js';
+import { CARD_HEIGHT, CARD_WIDTH, createCardRenderer } from './og.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const repo = path.resolve(here, '..');
@@ -71,13 +72,57 @@ const topLinks = (skip) => [
 ].filter((l) => l.href !== skip);
 
 async function buildWithDocubase(dir, base) {
-  const site = await loadSite(dir, { configOverrides: { base, siteUrl, links: topLinks(base) } });
+  // Every page points at its own social card, drawn further down into /og/<section>/<page>.png.
+  const socialImage = `/og/${base.replace(/^\/|\/$/g, '')}/{page}.png`;
+  const site = await loadSite(dir, { configOverrides: { base, siteUrl, links: topLinks(base), socialImage, ...(config.twitter ? { twitter: config.twitter } : {}) } });
   for (const warning of site.warnings) console.warn(`  warning (${base}): ${warning}`);
   const result = await build(site, { out: path.join(out, base.replace(/^\/|\/$/g, '')), safe: false });
   return { site, result };
 }
 const docs = await buildWithDocubase(path.join(repo, 'examples', 'docs'), '/docs/');
 const blog = await buildWithDocubase(path.join(here, 'blog'), '/blog/');
+
+// ---- Icons and social cards ------------------------------------------------------------------------
+const MARK_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="18" fill="#050506"/><g fill="#fbff54"><rect x="29" y="14" width="6" height="36" rx="3"/><rect x="29" y="14" width="6" height="36" rx="3" transform="rotate(60 32 32)"/><rect x="29" y="14" width="6" height="36" rx="3" transform="rotate(-60 32 32)"/></g></svg>';
+await writeFile(path.join(out, 'favicon.svg'), MARK_SVG);
+{
+  const { Resvg } = await import('@resvg/resvg-js');
+  await writeFile(path.join(out, 'apple-touch-icon.png'), new Resvg(MARK_SVG.replace('rx="18"', 'rx="0"'), { fitTo: { mode: 'width', value: 180 } }).render().asPng());
+}
+const ICONS = '<link rel="icon" href="/favicon.svg" type="image/svg+xml">\n<link rel="apple-touch-icon" href="/apple-touch-icon.png">';
+
+const renderCard = await createCardRenderer();
+const host = new URL(siteUrl).host;
+const cardUrl = (url) => (host + url).replace(/\/$/, '');
+let cards = 0;
+async function writeCard(rel, options) {
+  const file = path.join(out, 'og', rel);
+  await mkdir(path.dirname(file), { recursive: true });
+  await writeFile(file, renderCard(options));
+  cards++;
+}
+const section = (slug) => {
+  const first = slug.split('/')[0];
+  return first === 'api' ? 'API' : first.charAt(0).toUpperCase() + first.slice(1);
+};
+for (const page of docs.site.pages) {
+  await writeCard(`docs/${page.slug || 'index'}.png`, {
+    title: page.title,
+    description: page.description,
+    label: page.slug.includes('/') ? `Docs · ${section(page.slug)}` : 'Docs',
+    url: cardUrl(page.url),
+    seed: page.url,
+  });
+}
+for (const page of blog.site.pages) {
+  await writeCard(`blog/${page.slug || 'index'}.png`, {
+    title: page.title,
+    description: page.description,
+    label: page.isPost && page.date ? `Journal · ${formatDate(page.date, 'en')}` : 'Journal',
+    url: cardUrl(page.url),
+    seed: page.url,
+  });
+}
 
 // Dress the docs and journal like the rest of the site: a skin loaded after the Docubase theme, with
 // Geist preloaded in place of the theme's serif.
@@ -97,6 +142,7 @@ for (const dir of ['docs', 'blog']) {
   for (const file of await htmlFiles(path.join(out, dir))) {
     let html = await readFile(file, 'utf8');
     html = html.replace(/<link rel="preload" href="[^"]*eb-garamond[^"]*"[^>]*>/, '<link rel="preload" href="/assets/fonts/geist-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>');
+    html = html.replace('<link rel="icon" href="data:,">', ICONS);
     const withSkin = html.replace(/(<style>:root\{--accent:[^<]*<\/style>)/, `$1\n<link rel="stylesheet" href="/assets/${skinName}">`);
     if (withSkin === html) throw new Error(`could not add the skin to ${path.relative(out, file)}`);
     await writeFile(file, withSkin);
@@ -124,7 +170,7 @@ const values = {
     `<link rel="preload" href="/assets/fonts/geist-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>`,
     `<link rel="stylesheet" href="/assets/${cssName}">`,
     `<link rel="alternate" type="application/atom+xml" title="Docubase Journal" href="/blog/feed.xml">`,
-    `<link rel="icon" href="data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="18" fill="#050506"/><g fill="#fbff54"><rect x="29" y="14" width="6" height="36" rx="3"/><rect x="29" y="14" width="6" height="36" rx="3" transform="rotate(60 32 32)"/><rect x="29" y="14" width="6" height="36" rx="3" transform="rotate(-60 32 32)"/></g></svg>')}">`,
+    ICONS,
   ].join('\n'),
   scripts: `<script src="/assets/${jsName}" defer></script>\n<script src="/assets/${sceneName}" defer></script>`,
   header: header.replaceAll('{{github}}', github),
@@ -150,6 +196,51 @@ async function pages(dir, rel = '') {
   }
   return list;
 }
+// Search and link preview tags for the marketing pages. Title and description come from each page's own
+// <title> and meta description; the card title is written for the image.
+const SOFTWARE = {
+  '@type': 'SoftwareApplication',
+  name: 'Docubase',
+  applicationCategory: 'DeveloperApplication',
+  operatingSystem: 'macOS, Linux, Windows',
+  description: 'Open source docs from a folder of Markdown, with search, Ask AI, MCP for agents and hosting from git.',
+  license: 'https://opensource.org/licenses/MIT',
+  url: `${siteUrl}/`,
+  offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+  ...(githubUrl ? { codeRepository: githubUrl } : {}),
+};
+const MARKETING = {
+  'index.html': { card: 'home', cardTitle: 'Markdown in.\nA docs site out.', label: 'Open source', schema: [{ '@type': 'WebSite', name: 'Docubase', url: `${siteUrl}/` }, SOFTWARE] },
+  'pricing/index.html': { card: 'pricing', cardTitle: 'Free to run.\nSimple to host.', label: 'Pricing', schema: [{ '@type': 'WebPage', name: 'Docubase pricing', url: `${siteUrl}/pricing/` }] },
+};
+const attr = (html, re) => (html.match(re) || [])[1] || '';
+const unesc = (v) => v.replace(/&quot;/g, '"').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
+async function marketingSeo(rel, html) {
+  const seo = MARKETING[rel];
+  if (!seo) return html;
+  const title = unesc(attr(html, /<title>([^<]*)<\/title>/));
+  const description = unesc(attr(html, /<meta name="description" content="([^"]*)">/));
+  const url = `${siteUrl}/${rel.replace(/index\.html$/, '')}`;
+  const image = `${siteUrl}/og/${seo.card}.png`;
+  await writeCard(`${seo.card}.png`, { title: seo.cardTitle, description, label: seo.label, url: cardUrl(url.slice(siteUrl.length)), seed: url });
+  const tags = [
+    `<link rel="canonical" href="${esc(url)}">`,
+    `<meta property="og:type" content="website">`,
+    `<meta property="og:site_name" content="Docubase">`,
+    `<meta property="og:title" content="${esc(title)}">`,
+    `<meta property="og:description" content="${esc(description)}">`,
+    `<meta property="og:url" content="${esc(url)}">`,
+    `<meta property="og:image" content="${esc(image)}">`,
+    `<meta property="og:image:width" content="${CARD_WIDTH}">`,
+    `<meta property="og:image:height" content="${CARD_HEIGHT}">`,
+    `<meta property="og:image:alt" content="${esc(seo.cardTitle.replace(/\n/g, ' '))}">`,
+    `<meta name="twitter:card" content="summary_large_image">`,
+    ...(config.twitter ? [`<meta name="twitter:site" content="${esc(config.twitter)}">`] : []),
+    `<script type="application/ld+json">${JSON.stringify({ '@context': 'https://schema.org', '@graph': seo.schema }).replace(/</g, '\\u003c')}</script>`,
+  ];
+  return html.replace('</head>', `${tags.join('\n')}\n</head>`);
+}
+
 const htmlPages = await pages(src);
 for (const rel of htmlPages) {
   let html = await readFile(path.join(src, rel), 'utf8');
@@ -157,6 +248,7 @@ for (const rel of htmlPages) {
   for (let i = 0; i < 2; i++) html = html.replace(/\{\{(\w+)\}\}/g, (m, key) => (key in values ? values[key] : m));
   const left = html.match(/\{\{\w+\}\}/);
   if (left) throw new Error(`${rel}: unknown placeholder ${left[0]}`);
+  html = await marketingSeo(rel, html);
   await mkdir(path.dirname(path.join(out, rel)), { recursive: true });
   await writeFile(path.join(out, rel), html);
 }
@@ -188,6 +280,9 @@ ${common}
 /assets/*
   Cache-Control: public, max-age=31536000, immutable
 
+/og/*
+  Cache-Control: public, max-age=86400
+
 /docs/assets/*
   Cache-Control: public, max-age=31536000, immutable
 
@@ -208,13 +303,13 @@ await writeFile(path.join(out, '_redirects'), `# Generated by site/build.mjs
 `);
 
 const urls = [
-  ...htmlPages.filter((p) => p !== '404.html').map((p) => `/${p.replace(/index\.html$/, '')}`),
-  ...docs.site.pages.filter((p) => !p.hidden).map((p) => p.url),
-  ...blog.site.pages.filter((p) => !p.hidden).map((p) => p.url),
+  ...htmlPages.filter((p) => p !== '404.html').map((p) => ({ url: `/${p.replace(/index\.html$/, '')}` })),
+  ...docs.site.pages.filter((p) => !p.hidden).map((p) => ({ url: p.url })),
+  ...blog.site.pages.filter((p) => !p.hidden).map((p) => ({ url: p.url, lastmod: p.date })),
 ];
 await writeFile(path.join(out, 'sitemap.xml'), `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${urls.map((u) => `  <url><loc>${esc(siteUrl + u)}</loc></url>`).join('\n')}
+${urls.map((u) => `  <url><loc>${esc(siteUrl + u.url)}</loc>${u.lastmod ? `<lastmod>${esc(u.lastmod)}</lastmod>` : ''}</url>`).join('\n')}
 </urlset>
 `);
 await writeFile(path.join(out, 'robots.txt'), `User-agent: *\nAllow: /\n\nSitemap: ${siteUrl}/sitemap.xml\n`);
@@ -225,5 +320,6 @@ const kb = async (rel) => ((await stat(path.join(out, rel))).size / 1024).toFixe
 console.log(`Built ${siteUrl} into site/dist in ${Date.now() - started} ms`);
 console.log(`  marketing: ${htmlPages.length} pages, index.html ${await kb('index.html')} KB, ${cssName} ${await kb(`assets/${cssName}`)} KB, ${jsName} ${await kb(`assets/${jsName}`)} KB, ${sceneName} ${await kb(`assets/${sceneName}`)} KB`);
 console.log(`  docs:      ${docs.result.pages} pages at /docs/`);
+console.log(`  social:    ${cards} cards in /og/, favicon.svg, apple-touch-icon.png`);
 console.log(`  skin:      ${skinName} on every docs and journal page`);
 console.log(`  journal:   ${blog.result.pages} pages at /blog/, ${blog.site.blog.posts.length} posts, feed at /blog/feed.xml`);

@@ -16,6 +16,8 @@ export const DEFAULTS = {
   footer: '',
   sidebar: null,
   siteUrl: null,
+  socialImage: null,
+  twitter: null,
   openapi: null,
   assistant: {
     enabled: false,
@@ -62,6 +64,22 @@ function isHttpUrl(value) {
   } catch {
     return false;
   }
+}
+
+/**
+ * A social image: a full http(s) URL, a path from the site root ("/og.png") or a path inside the docs
+ * output ("images/og.png"). It may contain {page}, replaced by the page path ("index" for the start page).
+ * Exported so frontmatter "image" follows the same rules.
+ */
+export function normalizeImage(value, key, raise) {
+  if (typeof value !== 'string' || !value.trim()) raise(`"${key}" must be a URL or a path to an image`);
+  const image = value.trim();
+  if (/^[a-z][a-z0-9+.-]*:/i.test(image)) {
+    if (!isHttpUrl(image.replaceAll('{page}', 'index'))) raise(`"${key}" must be an http(s) URL or a path such as /og.png`);
+    return image;
+  }
+  if (image.startsWith('//') || image.split(/[\\/]/).includes('..') || /["<>\s]/.test(image)) raise(`"${key}" must be a path inside the site, such as /og.png`);
+  return image;
 }
 
 function normalizeOpenApi(value) {
@@ -266,6 +284,12 @@ export function normalizeConfig(user = {}) {
     const url = expectString(user.siteUrl, 'siteUrl');
     if (!isHttpUrl(url)) fail('"siteUrl" must be a full http(s) URL such as https://docs.example.com');
     config.siteUrl = url.replace(/\/+$/, '');
+  }
+  if ('socialImage' in user && user.socialImage !== null) config.socialImage = normalizeImage(user.socialImage, 'socialImage', fail);
+  if ('twitter' in user && user.twitter !== null) {
+    const handle = expectString(user.twitter, 'twitter').trim();
+    if (!/^@?[A-Za-z0-9_]{1,15}$/.test(handle)) fail('"twitter" must be an X (Twitter) handle such as @docubase');
+    config.twitter = handle.startsWith('@') ? handle : `@${handle}`;
   }
   if ('openapi' in user && user.openapi !== null) config.openapi = normalizeOpenApi(user.openapi);
   if ('assistant' in user && user.assistant !== null) config.assistant = normalizeAssistant(user.assistant);

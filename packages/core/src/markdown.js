@@ -8,6 +8,7 @@ import remarkRehype from 'remark-rehype';
 import rehypeSlug from 'rehype-slug';
 import rehypeHighlight from 'rehype-highlight';
 import rehypeStringify from 'rehype-stringify';
+import { normalizeImage } from './config.js';
 import { visit, SKIP } from 'unist-util-visit';
 import { toString } from 'hast-util-to-string';
 import { toSlug, toUrl } from './files.js';
@@ -247,6 +248,11 @@ export function normalizeFrontmatter(data, source) {
     if (typeof data.description !== 'string') throw new DocubaseError(`${source}: frontmatter "description" must be a string`);
     fm.description = data.description;
   }
+  if (data.image !== undefined) {
+    fm.image = normalizeImage(data.image, 'image', (message) => {
+      throw new DocubaseError(`${source}: frontmatter ${message}`);
+    });
+  }
   if (data.order !== undefined) {
     if (typeof data.order !== 'number' || Number.isNaN(data.order)) {
       throw new DocubaseError(`${source}: frontmatter "order" must be a number`);
@@ -324,6 +330,7 @@ export async function compilePage({ source, raw, base = '/', processor = createP
     driftIgnore: fm.driftIgnore ?? false,
     date: fm.date ?? null,
     author: fm.author ?? null,
+    image: fm.image ?? null,
     readingMinutes: Math.max(1, Math.round(String(ctx.text || '').split(/\s+/).filter(Boolean).length / 230)),
     markdown: parsed.content,
     html: String(file),

@@ -200,3 +200,17 @@ test('config validation gives readable errors', () => {
   assert.throws(() => normalizeConfig({ links: [{ label: 'x', href: 'javascript:alert(1)' }] }), /javascript/);
   assert.equal(normalizeConfig({ base: 'docs' }).base, '/docs/');
 });
+
+test('social image and twitter settings are checked, and pages may name their own image', async () => {
+  assert.equal(normalizeConfig({ socialImage: '/og/{page}.png' }).socialImage, '/og/{page}.png');
+  assert.equal(normalizeConfig({ socialImage: 'https://cdn.example.com/og.png' }).socialImage, 'https://cdn.example.com/og.png');
+  assert.throws(() => normalizeConfig({ socialImage: 'javascript:alert(1)' }), /http\(s\) URL/);
+  assert.throws(() => normalizeConfig({ socialImage: '../secret.png' }), /inside the site/);
+  assert.throws(() => normalizeConfig({ socialImage: '//evil.example/og.png' }), /inside the site/);
+  assert.equal(normalizeConfig({ twitter: 'docubase' }).twitter, '@docubase');
+  assert.throws(() => normalizeConfig({ twitter: 'not a handle' }), /handle/);
+
+  const page = await compilePage({ source: 'a.md', raw: '---\nimage: images/a.png\n---\n# A' });
+  assert.equal(page.image, 'images/a.png');
+  await assert.rejects(compilePage({ source: 'b.md', raw: '---\nimage: 5\n---\n# B' }), /b\.md: frontmatter "image"/);
+});

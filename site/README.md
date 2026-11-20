@@ -51,6 +51,12 @@ The build writes `_headers` (a strict content security policy, long caching for 
 
 Add a Markdown file under `site/blog/posts` with a `title`, `description` and `date`. The three newest posts also appear on the home page.
 
+## Search and link previews
+
+* Docubase writes the canonical URL, Open Graph, X card tags and schema.org data for every docs and journal page. The marketing pages get the same from `build.mjs`, plus `SoftwareApplication` data on the home page.
+* `og.mjs` draws a 1200 by 630 card for every page into `dist/og/` with resvg: the page title, its description, a section label and the same dot wave as the site. The docs and journal point at theirs through `socialImage`.
+* Set `twitter` in `site.config.json` to add your X handle to every page. The sitemap carries a date for each post.
+
 ## The look
 
 A white page with black stage cards, cream panels, Geist type and one electric yellow accent (`--accent` in `assets/site.css`).

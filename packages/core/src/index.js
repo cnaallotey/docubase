@@ -11,10 +11,12 @@ import { applyBaseline, findingKey, readBaseline, runDrift, writeBaseline, RULES
 import { assertPublicHost, isPrivateAddress } from './netguard.js';
 import { DocubaseError } from './util.js';
 
+import { seoTags, socialImageUrl } from './seo.js';
 export {
   compilePage, createProcessor, loadConfig, normalizeConfig, buildNav, buildSearchIndex, SEARCH_OPTIONS, DocubaseError, CONFIG_FILE,
   buildChunks, buildLlmsFull, buildLlmsTxt, mdUrl, pageMarkdown, buildApiPages, loadSpec,
   runDrift, readBaseline, writeBaseline, applyBaseline, findingKey, DRIFT_RULES, assertPublicHost, isPrivateAddress,
+  seoTags, socialImageUrl,
 };
 
 async function readMetas(root, files) {
@@ -134,6 +136,7 @@ export async function loadSite(dir, { configOverrides = {} } = {}) {
   const search = buildSearchIndex(pages, nav.tree);
   const warnings = [...pages.flatMap((p) => p.warnings), ...apiWarnings, ...validate(pages, assets)];
   if (blog && !config.siteUrl) warnings.push(`${CONFIG_FILE}: set "siteUrl" so the blog gets an Atom feed (feed.xml)`);
+  if (!config.siteUrl && (config.socialImage || pages.some((p) => p.image))) warnings.push(`${CONFIG_FILE}: set "siteUrl" so social images get the full URL that link previews need`);
   if (blog && blog.posts.length === 0) warnings.push('The blog has no posts yet. Give a page a "date" in its frontmatter to make it a post.');
   const agents = buildAgentFiles({ config, pages, nav });
 

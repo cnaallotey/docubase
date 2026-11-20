@@ -44,15 +44,18 @@ useHead({
     { name: 'color-scheme', content: 'light dark' },
     { property: 'og:title', content: pageTitle },
     { property: 'og:description', content: description },
+    ...(page.seo ? page.seo.meta : []),
   ],
   link: [
     { rel: 'icon', href: config.favicon ? base + config.favicon : 'data:,' },
     { rel: 'preload', href: `${base}assets/fonts/eb-garamond-latin-400-normal.woff2`, as: 'font', type: 'font/woff2', crossorigin: '' },
     { rel: 'stylesheet', href: `${base}assets/docubase.css?v=${version}` },
     { rel: 'alternate', type: 'text/markdown', href: base + page.mdPath },
+    ...(page.seo && page.seo.canonical ? [{ rel: 'canonical', href: page.seo.canonical }] : []),
   ],
   style: [{ innerHTML: `:root{--accent:${config.accent}}` }],
   script: [
+    ...(page.seo ? [{ type: 'application/ld+json', innerHTML: JSON.stringify(page.seo.jsonLd).replace(/</g, '\\u003c') }] : []),
     {
       innerHTML: "try{var t=localStorage.getItem('docubase-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)}catch(e){}",
       tagPosition: 'head',

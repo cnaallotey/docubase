@@ -2,7 +2,7 @@ import { watch } from 'node:fs';
 import { mkdir, rm } from 'node:fs/promises';
 import path from 'node:path';
 import { addComponentsDir, addPlugin, addServerHandler, addTemplate, createResolver, defineNuxtModule, extendPages, updateTemplates } from '@nuxt/kit';
-import { loadSite } from '@docubase/core';
+import { loadSite, seoTags } from '@docubase/core';
 import { writeSupportFiles } from 'docubase/src/build.js';
 
 /** The part of a loaded site the Vue theme needs. Search text, source and link lists stay behind. */
@@ -22,6 +22,10 @@ function toSiteData(site, version) {
       next: page.next ?? null,
       editUrl: page.editUrl ?? null,
       mdPath: page.mdPath,
+      seo: seoTags(config, page, {
+        pageTitle: page.slug === '' || page.title === config.title ? config.title : `${page.title} · ${config.title}`,
+        description: page.description || config.description,
+      }),
       operations: page.api ? page.api.operations : [],
     };
   }

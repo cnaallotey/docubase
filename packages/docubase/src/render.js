@@ -1,5 +1,5 @@
 /** HTML templates for the default theme. Every value that comes from a file or config is escaped. */
-import { mdUrl } from '@docubase/core';
+import { mdUrl, seoTags } from '@docubase/core';
 
 export function esc(value) {
   return String(value)
@@ -98,7 +98,16 @@ function safeJson(value) {
   return JSON.stringify(value).replace(/</g, '\\u003c').replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029');
 }
 
-function shell(site, { title, description, body, currentUrl, toc = '', version, extraHead = '' }) {
+/** Search and link preview tags: canonical URL, Open Graph, X (Twitter) cards and structured data. */
+function seoHead(site, page, text) {
+  const { canonical, meta, jsonLd } = seoTags(site.config, page, text);
+  const tags = canonical ? [`<link rel="canonical" href="${esc(canonical)}">`] : [];
+  for (const m of meta) tags.push(m.property ? `<meta property="${esc(m.property)}" content="${esc(m.content)}">` : `<meta name="${esc(m.name)}" content="${esc(m.content)}">`);
+  tags.push(`<script type="application/ld+json">${safeJson(jsonLd)}</script>`);
+  return tags.join('\n') + '\n';
+}
+
+function shell(site, { title, description, body, currentUrl, toc = '', version, extraHead = '', page = null }) {
   const { config } = site;
   const isBlog = Boolean(site.blog);
   const feed = isBlog && config.siteUrl ? `<link rel="alternate" type="application/atom+xml" title="${esc(config.title)}" href="${esc(config.base)}feed.xml">\n` : '';
@@ -121,7 +130,7 @@ function shell(site, { title, description, body, currentUrl, toc = '', version, 
 <meta name="color-scheme" content="light dark">
 <meta property="og:title" content="${esc(pageTitle)}">
 <meta property="og:description" content="${esc(description || config.description)}">
-<link rel="icon" href="${site.favicon ? esc(config.base + site.favicon) : 'data:,'}">
+${page ? seoHead(site, page, { pageTitle, description: description || config.description }) : ''}<link rel="icon" href="${site.favicon ? esc(config.base + site.favicon) : 'data:,'}">
 <script>try{var t=localStorage.getItem('docubase-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
 <link rel="preload" href="${esc(config.base)}assets/fonts/eb-garamond-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="${esc(config.base)}assets/docubase.css?v=${esc(version)}">
@@ -199,6 +208,7 @@ ${footer}`;
     toc: renderToc(page),
     version,
     extraHead: `<link rel="alternate" type="text/markdown" href="${esc(md)}">\n`,
+    page,
   });
 }
 

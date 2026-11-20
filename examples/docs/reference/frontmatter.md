@@ -14,6 +14,7 @@ Frontmatter is YAML between two `---` lines at the top of a file.
 | `hidden` | true or false | Leave the page out of the sidebar and search |
 | `date` | date | Makes the page a post when `blog` is on, written as 2026-11-20 |
 | `author` | string | Shown under the title of a post |
+| `image` | string | Image for link previews of this page, in place of `socialImage`. A full URL or a path, see [Configuration](config.md#search-engines-and-link-previews) |
 
 A field with the wrong type, such as `order: first`, stops the build and names the file.
 

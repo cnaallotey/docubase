@@ -20,7 +20,9 @@ Put `docubase.config.json` in your docs folder. Every field is optional.
 | `footer` | string | empty | Text shown under every page |
 | `sidebar` | list | automatic | Replaces the generated sidebar, see [Navigation](../guides/navigation.md) |
 | `theme.accent` | hex colour | `#2f5d46` | Accent colour for links, buttons and the brand mark |
-| `siteUrl` | string | none | Public address of the site, used for absolute links in `llms.txt` |
+| `siteUrl` | string | none | Public address of the site. Gives every page a canonical URL and full links in `llms.txt`, the feed and link previews |
+| `socialImage` | string | none | Image shown in link previews. A full URL, a path from the site root (`/og.png`) or one inside the docs output. `{page}` becomes the page path, such as `guides/setup`, or `index` for the start page |
+| `twitter` | string | none | Your X (Twitter) handle, added to link preview tags |
 | `openapi` | object | none | Builds a reference from an OpenAPI file, see [API reference](../guides/api-reference.md) |
 | `assistant` | object | off | The Ask AI button, see below |
 | `blog` | true or false | off | Publish the folder as a blog, see [Blog](../guides/blog.md) |
@@ -72,3 +74,16 @@ These go inside `drift`. See [Docs drift detection](../guides/drift-detection.md
 :::warning
 Invalid values stop the build with a message that names the option. This is deliberate, so a typo never silently produces a broken site.
 :::
+
+## Search engines and link previews
+
+Every page gets a description, Open Graph and X (Twitter) card tags, and schema.org data: `TechArticle` for docs pages, `BlogPosting` for posts and `WebSite` for the start page. With `siteUrl` set, each page also gets a canonical URL.
+
+Link previews need a full image address, so set `siteUrl` when `socialImage` or a page `image` is a path. For one image per page, render your cards at build time and point `socialImage` at them:
+
+```json
+{
+  "siteUrl": "https://docs.example.com",
+  "socialImage": "/og/{page}.png"
+}
+```
