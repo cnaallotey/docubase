@@ -1,0 +1,29 @@
+{
+  "title": "Docubase",
+  "description": "Open source docs from a folder of Markdown. Fast pages, built in search, no account.",
+  "theme": {
+    "accent": "#2f5d46"
+  },
+  "openapi": {
+    "spec": "openapi.yaml",
+    "title": "API example"
+  },
+  "footer": "Docubase is MIT licensed. These docs are built with Docubase.",
+  "drift": {
+    "ignoreTokens": [
+      "guides/index.md",
+      "404.html",
+      "folder/index.html",
+      "search-index.json",
+      "docubase-mcp.json",
+      "_meta.json",
+      "GET /__host/**",
+      "POST /__host/**",
+      "PUT /__host/**",
+      "PATCH /__host/**",
+      "DELETE /__host/**",
+      "feed.xml",
+      "posts/2026/launch.md"
+    ]
+  }
+}

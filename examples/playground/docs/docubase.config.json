@@ -1,0 +1,39 @@
+{
+  "title": "Tasks Demo",
+  "description": "A test site that exercises every Docubase feature against a real local API.",
+  "theme": {
+    "accent": "#0f766e"
+  },
+  "links": [
+    {
+      "label": "Docubase docs",
+      "href": "http://127.0.0.1:3000/"
+    }
+  ],
+  "footer": "Playground for testing Docubase. Not a real product.",
+  "openapi": {
+    "spec": "openapi.yaml",
+    "title": "Tasks API",
+    "path": "api"
+  },
+  "assistant": {
+    "enabled": false,
+    "provider": "anthropic",
+    "model": "claude-haiku-5-5"
+  },
+  "drift": {
+    "repo": "..",
+    "ignore": [
+      "testing/drift-traps.md"
+    ],
+    "ignoreTokens": [
+      "search-index.json",
+      "_meta.json",
+      "ANTHROPIC_API_KEY",
+      "docubase-mcp.json"
+    ]
+  },
+  "mcp": {
+    "enabled": true
+  }
+}

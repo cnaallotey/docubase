@@ -1,0 +1,7 @@
+{
+  "title": "Docubase Journal",
+  "description": "Notes on building Docubase: docs from Markdown, search, agents and hosting.",
+  "blog": true,
+  "footer": "Written with Docubase. Subscribe with the Atom feed at /blog/feed.xml.",
+  "drift": { "ignoreTokens": ["feed.xml"] }
+}

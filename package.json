@@ -1,0 +1,27 @@
+{
+  "name": "docubase-monorepo",
+  "private": true,
+  "version": "0.1.0",
+  "license": "MIT",
+  "type": "module",
+  "workspaces": [
+    "packages/*",
+    "examples/nuxt"
+  ],
+  "scripts": {
+    "test": "npm test --workspace @docubase/core --workspace docubase --workspace @docubase/nuxt --workspace @docubase/host",
+    "build:example": "node packages/docubase/bin/docubase.js build examples/docs",
+    "dev:example": "node packages/docubase/bin/docubase.js dev examples/docs",
+    "build:nuxt": "npm run generate --workspace docubase-example-nuxt",
+    "playground:api": "npm run api --prefix examples/playground",
+    "playground:dev": "npm run docs:dev --prefix examples/playground",
+    "playground:check": "npm run docs:check --prefix examples/playground",
+    "playground:host": "npm run host --prefix examples/playground",
+    "build:site": "node site/build.mjs",
+    "preview:site": "node site/serve.mjs",
+    "deploy:site": "npm run build:site && npx wrangler pages deploy"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

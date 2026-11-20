@@ -1,0 +1,28 @@
+{
+  "name": "@docubase/nuxt",
+  "version": "0.1.0",
+  "description": "Nuxt module that turns a folder of Markdown into docs pages, using Docubase core.",
+  "license": "MIT",
+  "type": "module",
+  "main": "./src/module.js",
+  "exports": {
+    ".": "./src/module.js"
+  },
+  "files": [
+    "src"
+  ],
+  "scripts": {
+    "test": "node --test \"test/*.test.js\""
+  },
+  "dependencies": {
+    "@docubase/core": "^0.1.0",
+    "@nuxt/kit": "^4.1.0",
+    "docubase": "^0.1.0"
+  },
+  "peerDependencies": {
+    "nuxt": "^3.13.0 || ^4.0.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

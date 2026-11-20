@@ -1,0 +1,54 @@
+# The managed hosting server behind Caddy, which gets HTTPS certificates on demand.
+#   cp docker/.env.example docker/.env      (then edit it)
+#   docker compose -f docker/compose.host.yml --env-file docker/.env up -d --build
+services:
+  host:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      target: host
+    environment:
+      DOCUBASE_ADMIN_TOKEN: ${DOCUBASE_ADMIN_TOKEN:?set DOCUBASE_ADMIN_TOKEN in docker/.env}
+      DOCUBASE_MASTER_KEY: ${DOCUBASE_MASTER_KEY:?set DOCUBASE_MASTER_KEY in docker/.env}
+      DOCUBASE_BASE_DOMAIN: ${DOCUBASE_BASE_DOMAIN:?set DOCUBASE_BASE_DOMAIN in docker/.env}
+      DOCUBASE_ADMIN_HOST: admin.${DOCUBASE_BASE_DOMAIN}
+      DOCUBASE_PUBLIC_URL: https://admin.${DOCUBASE_BASE_DOMAIN}
+      DOCUBASE_TRUST_PROXY: "1"
+      DOCUBASE_DASHBOARD_HOST: app.${DOCUBASE_BASE_DOMAIN}
+      DOCUBASE_SIGNUP: ${DOCUBASE_SIGNUP:-closed}
+      # Billing is on only when all three are set. Leave them empty for a server without plans.
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
+      STRIPE_PRICE_ID: ${STRIPE_PRICE_ID:-}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
+    volumes:
+      - host-data:/data
+    expose:
+      - "8080"
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    restart: unless-stopped
+
+  caddy:
+    image: caddy:2-alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      DOCUBASE_BASE_DOMAIN: ${DOCUBASE_BASE_DOMAIN}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      - host
+    restart: unless-stopped
+
+volumes:
+  host-data:
+  caddy-data:
+  caddy-config:

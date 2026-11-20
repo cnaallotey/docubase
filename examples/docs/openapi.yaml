@@ -1,0 +1,106 @@
+openapi: 3.0.3
+info:
+  title: Bookmarks API
+  version: 1.0.0
+  description: |
+    A small example API used to show how Docubase builds a reference from an OpenAPI file.
+    The server below does not exist, so the request playground will report a network error here.
+servers:
+  - url: https://api.example.com/v1
+tags:
+  - name: Bookmarks
+    description: Save and read links.
+  - name: Folders
+    description: Group bookmarks.
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+  schemas:
+    Bookmark:
+      type: object
+      required: [url]
+      properties:
+        id: { type: string, format: uuid, description: Set by the server. }
+        url: { type: string, format: uri, description: The saved link. }
+        title: { type: string, description: A short label. }
+        folderId: { type: string, nullable: true, description: The folder this bookmark is in, if any. }
+        createdAt: { type: string, format: date-time }
+    Folder:
+      type: object
+      required: [name]
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string, example: Reading list }
+security:
+  - bearerAuth: []
+paths:
+  /bookmarks:
+    get:
+      summary: List bookmarks
+      tags: [Bookmarks]
+      parameters:
+        - name: folderId
+          in: query
+          description: Only return bookmarks in this folder.
+          schema: { type: string }
+        - name: limit
+          in: query
+          schema: { type: integer, default: 20, minimum: 1, maximum: 100 }
+      responses:
+        '200':
+          description: A page of bookmarks.
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Bookmark' }
+    post:
+      summary: Create a bookmark
+      tags: [Bookmarks]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/Bookmark' }
+            example: { url: 'https://docubase.dev', title: Docubase }
+      responses:
+        '201':
+          description: The bookmark was created.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Bookmark' }
+        '422': { description: The link is not valid. }
+  /bookmarks/{id}:
+    get:
+      summary: Get a bookmark
+      tags: [Bookmarks]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        '200':
+          description: The bookmark.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Bookmark' }
+        '404': { description: No bookmark with that id. }
+    delete:
+      summary: Delete a bookmark
+      tags: [Bookmarks]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        '204': { description: Deleted. }
+  /folders:
+    get:
+      summary: List folders
+      tags: [Folders]
+      responses:
+        '200':
+          description: All folders.
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Folder' }

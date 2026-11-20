@@ -1,0 +1,14 @@
+{
+  "name": "docubase-example-nuxt",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview"
+  },
+  "dependencies": {
+    "@docubase/nuxt": "^0.1.0",
+    "nuxt": "^4.1.0"
+  }
+}

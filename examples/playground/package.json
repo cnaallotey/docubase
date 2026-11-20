@@ -1,0 +1,19 @@
+{
+  "name": "tasks-demo",
+  "private": true,
+  "version": "0.1.0",
+  "description": "A tiny tasks API with docs, used to try every Docubase feature by hand.",
+  "type": "module",
+  "bin": {
+    "tasks": "bin/tasks.js"
+  },
+  "scripts": {
+    "api": "node bin/tasks.js --seed",
+    "docs:dev": "node ../../packages/docubase/bin/docubase.js dev docs --port 3001",
+    "docs:build": "node ../../packages/docubase/bin/docubase.js build docs",
+    "docs:start": "node ../../packages/docubase/bin/docubase.js start docs",
+    "docs:check": "node ../../packages/docubase/bin/docubase.js check docs --no-history",
+    "docs:mcp": "node ../../packages/docubase/bin/docubase.js mcp docs",
+    "host": "node host-dev.mjs"
+  }
+}

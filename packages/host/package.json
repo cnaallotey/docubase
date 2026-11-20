@@ -1,0 +1,28 @@
+{
+  "name": "@docubase/host",
+  "version": "0.1.0",
+  "description": "Managed hosting server for Docubase sites: builds docs from git, serves them by hostname, and runs the assistant per site.",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "docubase-host": "./bin/docubase-host.js"
+  },
+  "main": "./src/index.js",
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "files": [
+    "bin",
+    "src"
+  ],
+  "scripts": {
+    "test": "node --test \"test/*.test.js\""
+  },
+  "dependencies": {
+    "@docubase/core": "^0.1.0",
+    "docubase": "^0.1.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

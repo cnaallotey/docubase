@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 120" font-family="system-ui, sans-serif" font-size="14">
+  <rect x="10" y="35" width="140" height="50" rx="8" fill="#ccfbf1" stroke="#0f766e"/>
+  <text x="80" y="65" text-anchor="middle" fill="#134e4a">Docs (Try it)</text>
+  <rect x="370" y="35" width="140" height="50" rx="8" fill="#ccfbf1" stroke="#0f766e"/>
+  <text x="440" y="65" text-anchor="middle" fill="#134e4a">Tasks API :4010</text>
+  <line x1="150" y1="60" x2="362" y2="60" stroke="#0f766e" stroke-width="2"/>
+  <path d="M362 54 L372 60 L362 66 Z" fill="#0f766e"/>
+  <text x="260" y="50" text-anchor="middle" fill="#334155">Bearer dev-token</text>
+</svg>

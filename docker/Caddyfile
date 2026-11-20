@@ -1,0 +1,22 @@
+{
+	# A certificate is issued only for names the hosting server knows about.
+	on_demand_tls {
+		ask http://host:8080/__host/tls-check
+	}
+}
+
+:443 {
+	tls {
+		on_demand
+	}
+
+	# These two paths are for the proxy and for health checks. They are not public.
+	@internal path /__host/health /__host/tls-check
+	respond @internal 404
+
+	reverse_proxy host:8080
+}
+
+:80 {
+	redir https://{host}{uri} permanent
+}

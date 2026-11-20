@@ -1,0 +1,157 @@
+openapi: 3.0.3
+info:
+  title: Tasks API
+  version: 0.1.0
+  description: |
+    The real API in `examples/playground`. Start it with `npm run api`, then use **Try it** below.
+    The token is `dev-token` unless you changed it.
+servers:
+  - url: http://127.0.0.1:4010
+    description: Local API started with npm run api
+tags:
+  - name: Tasks
+    description: Create, read, change and delete tasks.
+  - name: Health
+    description: Check the API is up. No token needed.
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+  schemas:
+    Task:
+      type: object
+      required: [id, title, done, createdAt]
+      properties:
+        id: { type: string, format: uuid, description: Set by the server. }
+        title: { type: string, example: Buy milk }
+        done: { type: boolean, example: false }
+        createdAt: { type: string, format: date-time }
+    NewTask:
+      type: object
+      required: [title]
+      properties:
+        title: { type: string, example: Buy milk }
+        done: { type: boolean, default: false }
+    TaskChanges:
+      type: object
+      properties:
+        title: { type: string, example: Buy oat milk }
+        done: { type: boolean, example: true }
+    Error:
+      type: object
+      properties:
+        error: { type: string }
+  parameters:
+    TaskId:
+      name: id
+      in: path
+      required: true
+      schema: { type: string }
+  responses:
+    Unauthorized:
+      description: Missing or wrong token.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    NotFound:
+      description: No task with that id.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+security:
+  - bearerAuth: []
+paths:
+  /health:
+    get:
+      tags: [Health]
+      summary: Check the API
+      operationId: health
+      security: []
+      responses:
+        '200':
+          description: The API is up.
+          content:
+            application/json:
+              example: { ok: true }
+  /tasks:
+    get:
+      tags: [Tasks]
+      summary: List tasks
+      operationId: listTasks
+      parameters:
+        - name: done
+          in: query
+          description: Only tasks that are done (true) or open (false).
+          schema: { type: boolean }
+      responses:
+        '200':
+          description: Every matching task.
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Task' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    post:
+      tags: [Tasks]
+      summary: Create a task
+      operationId: addTask
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/NewTask' }
+      responses:
+        '201':
+          description: The new task.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Task' }
+        '400':
+          description: The title is missing or empty.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+  /tasks/{id}:
+    parameters:
+      - $ref: '#/components/parameters/TaskId'
+    get:
+      tags: [Tasks]
+      summary: Get a task
+      operationId: getTask
+      responses:
+        '200':
+          description: The task.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Task' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    patch:
+      tags: [Tasks]
+      summary: Change a task
+      operationId: updateTask
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/TaskChanges' }
+      responses:
+        '200':
+          description: The changed task.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Task' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    delete:
+      tags: [Tasks]
+      summary: Delete a task
+      operationId: removeTask
+      responses:
+        '204':
+          description: Deleted.
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }

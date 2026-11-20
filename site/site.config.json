@@ -1,0 +1,11 @@
+{
+  "siteUrl": "https://docubase.pages.dev",
+  "dashboardUrl": null,
+  "githubUrl": null,
+  "plans": {
+    "proPrice": "$19",
+    "proPeriod": "per month",
+    "freeSites": 1,
+    "proSites": 10
+  }
+}

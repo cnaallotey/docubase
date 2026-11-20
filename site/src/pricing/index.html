@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pricing · Docubase</title>
+<meta name="description" content="Docubase is free and open source. Hosting from git is free for one site, and Pro adds more sites, custom domains and Ask AI.">
+<meta name="theme-color" content="#f3f6f2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0e1612" media="(prefers-color-scheme: dark)">
+{{head}}
+</head>
+<body class="page-pricing">
+{{header}}
+<main id="main">
+  <section class="page-hero" aria-labelledby="pricing-title">
+    <div class="grain" aria-hidden="true"></div>
+    <div class="page-hero-inner">
+      <p class="eyebrow load" style="--d:0">Pricing</p>
+      <h1 id="pricing-title"><span class="line"><span class="load" style="--d:1">Free to run.</span></span><span class="line"><span class="load" style="--d:2"><em>Simple</em> to host.</span></span></h1>
+      <p class="hero-lede load" style="--d:3">The generator is open source and always will be. Pay only if you want us to build and serve your docs from git.</p>
+    </div>
+  </section>
+
+  <section class="plans" aria-label="Plans">
+    <article class="plan" data-reveal>
+      <p class="plan-k">Open source</p>
+      <p class="plan-price">Free</p>
+      <p class="plan-per">forever, MIT licensed</p>
+      <p class="plan-desc">Everything Docubase does, on your own machine, CI or server.</p>
+      <ul>
+        <li>Unlimited sites and pages</li>
+        <li>Search, llms.txt and MCP</li>
+        <li>Ask AI on your own key</li>
+        <li>Drift checks and the GitHub Action</li>
+        <li>Docker image and the hosting server</li>
+      </ul>
+      <a class="btn" href="/docs/getting-started/">Get started</a>
+    </article>
+    <article class="plan" data-reveal style="--rd:1">
+      <p class="plan-k">Hosted</p>
+      <p class="plan-price">$0</p>
+      <p class="plan-per">for one site</p>
+      <p class="plan-desc">Connect a repository and get a site at your own name, rebuilt on every push.</p>
+      <ul>
+        <li>{{freeSites}} site on its own subdomain</li>
+        <li>Builds on every push</li>
+        <li>Search, llms.txt and hosted MCP</li>
+        <li>Build logs in the dashboard</li>
+      </ul>
+      <a class="btn" href="{{dashboardUrl}}">Create an account</a>
+    </article>
+    <article class="plan plan-featured" data-reveal style="--rd:2">
+      <p class="plan-k">Pro</p>
+      <p class="plan-price">{{proPrice}}</p>
+      <p class="plan-per">{{proPeriod}}</p>
+      <p class="plan-desc">For teams whose docs are part of the product.</p>
+      <ul>
+        <li>{{proSites}} sites</li>
+        <li>Custom domains, verified by DNS</li>
+        <li>Ask AI on every site, with your key</li>
+        <li>Everything in Hosted</li>
+      </ul>
+      <a class="btn" href="{{dashboardUrl}}" data-magnetic>Start with Pro</a>
+    </article>
+  </section>
+
+  <section class="compare" aria-labelledby="compare-title">
+    <h2 id="compare-title" data-reveal>Side by side</h2>
+    <table data-reveal>
+      <thead><tr><th scope="col">Feature</th><th scope="col">Open source</th><th scope="col">Hosted</th><th scope="col">Pro</th></tr></thead>
+      <tbody>
+        <tr><td>Search, dark mode, contents</td><td class="yes">✳</td><td class="yes">✳</td><td class="yes">✳</td></tr>
+        <tr><td>OpenAPI reference with Try it</td><td class="yes">✳</td><td class="yes">✳</td><td class="yes">✳</td></tr>
+        <tr><td>llms.txt and MCP</td><td class="yes">✳</td><td class="yes">✳</td><td class="yes">✳</td></tr>
+        <tr><td>Builds from git on push</td><td>Your CI</td><td class="yes">✳</td><td class="yes">✳</td></tr>
+        <tr><td>Custom domains</td><td>Your host</td><td class="no">–</td><td class="yes">✳</td></tr>
+        <tr><td>Ask AI</td><td>Your server</td><td class="no">–</td><td class="yes">✳</td></tr>
+        <tr><td>Sites</td><td>Unlimited</td><td>{{freeSites}}</td><td>{{proSites}}</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="faq" aria-labelledby="faq-title">
+    <h2 id="faq-title" data-reveal>Questions</h2>
+    <details data-reveal><summary>Is the open source version limited?</summary><p>No. The hosted plans run the same code you can run yourself. Paying buys you not having to run a server, not features.</p></details>
+    <details data-reveal><summary>Who pays for Ask AI?</summary><p>You do, directly. The assistant uses your own Anthropic or OpenAI compatible key, stored encrypted. We never resell tokens or count credits.</p></details>
+    <details data-reveal><summary>What happens if I stop paying?</summary><p>Your sites stay online at their docubase address. Custom domains stop answering and saved assistant keys are ignored until you subscribe again. Nothing is deleted.</p></details>
+    <details data-reveal><summary>Can I leave?</summary><p>Your docs are Markdown in your own repository. Run <code>npx docubase build</code> and host the output anywhere.</p></details>
+  </section>
+
+  <section class="closer" aria-labelledby="closer-title">
+    <div class="closer-sky" data-reveal>
+      <div class="grain" aria-hidden="true"></div>
+      <h2 class="closer-title" id="closer-title">Start <em>free.</em></h2>
+      <p class="closer-lede">One command on your laptop, or one repository in the dashboard.</p>
+      <div class="hero-actions closer-actions">
+        <button class="cmd" type="button" data-copy="npx docubase dev docs" aria-label="Copy the command npx docubase dev docs">
+          <span class="cmd-prompt" aria-hidden="true">$</span><code>npx docubase dev docs</code><span class="cmd-hint" data-copy-label>Copy</span>
+        </button>
+      </div>
+    </div>
+  </section>
+</main>
+{{footer}}
+{{scripts}}
+</body>
+</html>

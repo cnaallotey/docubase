@@ -1,0 +1,14 @@
+.git
+**/node_modules
+**/dist
+**/.nuxt
+**/.output
+**/.data
+**/test
+**/.fixture-*
+examples/nuxt
+*.zip
+docker/*.md
+
+docker/.env
+examples/playground/.host-data

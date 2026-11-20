@@ -1,0 +1,22 @@
+# Serve one docs folder.   docker compose -f docker/compose.yml up --build
+services:
+  docs:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      target: docs
+    ports:
+      - "3000:3000"
+    volumes:
+      - ../examples/docs:/docs:ro
+    environment:
+      # Only needed when the assistant is turned on in docubase.config.json.
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+    read_only: true
+    tmpfs:
+      - /site
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped

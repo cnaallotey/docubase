@@ -1,0 +1,6 @@
+# Cloudflare Pages project for the Docubase website (marketing pages, /docs/ and /blog/).
+# Build:  npm run build:site      Output: site/dist
+# Deploy: npx wrangler pages deploy
+name = "docubase-site"
+pages_build_output_dir = "site/dist"
+compatibility_date = "2025-11-01"

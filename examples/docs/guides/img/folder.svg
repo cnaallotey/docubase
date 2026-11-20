@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 140" role="img" aria-label="A docs folder with an index file and two sections">
+  <rect x="1" y="1" width="358" height="138" rx="10" fill="#f6f7f9" stroke="#d0d5db"/>
+  <text x="24" y="34" font-family="system-ui, sans-serif" font-size="15" font-weight="600" fill="#1b1f24">docs/</text>
+  <text x="44" y="60" font-family="ui-monospace, monospace" font-size="13" fill="#57606a">index.md</text>
+  <text x="44" y="82" font-family="ui-monospace, monospace" font-size="13" fill="#57606a">guides/</text>
+  <text x="44" y="104" font-family="ui-monospace, monospace" font-size="13" fill="#57606a">reference/</text>
+  <rect x="236" y="48" width="96" height="60" rx="8" fill="#e0e7ff" stroke="#4f46e5"/>
+  <text x="284" y="83" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" fill="#1b1f24">Sidebar</text>
+</svg>

@@ -1,0 +1,40 @@
+name: Docubase docs drift check
+description: Fail a pull request when the docs describe files, flags, scripts, environment variables or endpoints that no longer exist.
+author: Charles Allotey
+
+inputs:
+  path:
+    description: Folder that holds the docs, relative to the repository root.
+    default: docs
+  fail-on:
+    description: Fail on "error" (default), on "warn" or never.
+    default: error
+  external:
+    description: Set to "true" to also check links to other sites.
+    default: 'false'
+  baseline:
+    description: Optional baseline file. Findings listed in it do not fail the check.
+    default: ''
+  version:
+    description: Version of the docubase package to run.
+    default: latest
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 20
+    - name: Check docs against code
+      shell: bash
+      env:
+        DOCS_PATH: ${{ inputs.path }}
+        FAIL_ON: ${{ inputs.fail-on }}
+        EXTERNAL: ${{ inputs.external }}
+        BASELINE: ${{ inputs.baseline }}
+        DOCUBASE_VERSION: ${{ inputs.version }}
+      run: |
+        args=(check "$DOCS_PATH" --format github --fail-on "$FAIL_ON")
+        if [ "$EXTERNAL" = "true" ]; then args+=(--external); fi
+        if [ -n "$BASELINE" ]; then args+=(--baseline "$BASELINE"); fi
+        npx --yes "docubase@${DOCUBASE_VERSION}" "${args[@]}"
