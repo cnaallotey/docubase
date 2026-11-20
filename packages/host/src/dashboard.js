@@ -105,7 +105,7 @@ export function createDashboard({ store, config, ops, billing, limitsFor, descri
       user: publicUser(user),
       limits: limitsFor(user),
       sites: store.sitesOf(user.id).length,
-      billing: { enabled: billing.enabled },
+      billing: { enabled: billing.enabled, provider: billing.label },
     };
   }
 
@@ -191,7 +191,7 @@ export function createDashboard({ store, config, ops, billing, limitsFor, descri
   async function deleteAccount(req, res, user) {
     const body = await readJson(req);
     if (!(await verifyPassword(String(body.password ?? ''), user.passwordHash))) throw new ApiError(401, 'The password is wrong');
-    if (user.billing?.status && ['active', 'trialing', 'past_due'].includes(user.billing.status)) {
+    if (user.billing?.status && (billing.isActive(user.billing.status) || ['active', 'trialing', 'past_due', 'non-renewing', 'attention'].includes(user.billing.status))) {
       throw new ApiError(409, 'Cancel your subscription in Billing first, then delete the account.');
     }
     await ops.removeUser(user.id);
@@ -246,7 +246,7 @@ export function createDashboard({ store, config, ops, billing, limitsFor, descri
       if (action === 'portal') return sendJson(res, 200, { url: await billing.portal(user, { returnUrl: back }) });
     } catch (error) {
       if (error instanceof BillingError) {
-        if (error.providerStatus) log.error(`billing: Stripe answered ${error.providerStatus}`);
+        if (error.providerStatus) log.error(`billing: ${billing.label} answered ${error.providerStatus}`);
         throw new ApiError(error.status, error.message);
       }
       throw error;

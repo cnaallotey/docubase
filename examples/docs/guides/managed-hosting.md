@@ -6,7 +6,7 @@ order: 9
 
 `docubase-host` is the server behind a managed tier. You give it a git repository, and it builds the docs, serves them at `<name>.your-domain.com` or at a custom domain, rebuilds on every push, and answers Ask AI questions with a key the site owner supplies. You can run it yourself, and it is the same code a hosted plan would run.
 
-It has two front doors: an admin API for the operator, and a web dashboard where people sign up, add their own sites and pay for a plan through Stripe. Billing is optional, so a team can run it for itself with no plans at all.
+It has two front doors: an admin API for the operator, and a web dashboard where people sign up, add their own sites and pay for a plan through Paystack. Billing is optional, so a team can run it for itself with no plans at all.
 
 ## Start it
 
@@ -46,9 +46,10 @@ Point `*.docs.example.com`, `admin.docs.example.com` and `app.docs.example.com` 
 | `DOCUBASE_USER_MAX_SITES` | `3` | Sites per account when billing is off |
 | `DOCUBASE_FREE_SITES` | `1` | Sites on the free plan when billing is on |
 | `DOCUBASE_PRO_SITES` | `10` | Sites on the paid plan |
-| `STRIPE_SECRET_KEY` | none | Turns billing on, together with the next two |
-| `STRIPE_PRICE_ID` | none | The recurring Stripe price for the paid plan |
-| `STRIPE_WEBHOOK_SECRET` | none | Signing secret of the Stripe webhook |
+| `PAYSTACK_SECRET_KEY` | none | Turns billing on with Paystack, together with the next one |
+| `PAYSTACK_PLAN_CODE` | none | The Paystack plan for the paid plan (`PLN_...`) |
+| `DOCUBASE_BILLING` | `paystack` when its keys are set | `paystack`, `stripe` or `off`. Stripe is used only when this says so |
+| `STRIPE_SECRET_KEY`, `STRIPE_PRICE_ID`, `STRIPE_WEBHOOK_SECRET` | none | Stripe keys, read only when `DOCUBASE_BILLING=stripe` |
 | `DOCUBASE_MAX_SITES` | `50` | Most sites this server will hold |
 | `DOCUBASE_BUILD_CONCURRENCY` | `2` | Builds that run at the same time |
 | `DOCUBASE_BUILD_TIMEOUT_SECONDS` | `120` | A build that takes longer is stopped |
@@ -116,9 +117,9 @@ A domain added from the dashboard stays pending until its owner adds a TXT recor
 * The page loads only its own script and stylesheet, under a strict content security policy, and cannot be framed.
 * Changing the password signs out every other device.
 
-## Billing with Stripe
+## Billing
 
-Set `STRIPE_SECRET_KEY`, `STRIPE_PRICE_ID` and `STRIPE_WEBHOOK_SECRET` to turn billing on. Without all three there are no plans: every account gets custom domains, the assistant and `DOCUBASE_USER_MAX_SITES` sites.
+Billing runs through [Paystack](https://paystack.com). Set `PAYSTACK_SECRET_KEY` and `PAYSTACK_PLAN_CODE` to turn it on. Without a payment provider there are no plans: every account gets custom domains, the assistant and `DOCUBASE_USER_MAX_SITES` sites.
 
 With billing on there are two plans:
 
@@ -129,12 +130,23 @@ With billing on there are two plans:
 
 To set it up:
 
-1. In Stripe, create a product with a recurring price and copy the price id (`price_...`).
-2. Add a webhook endpoint at `https://app.docs.example.com/__host/stripe/webhook` for `checkout.session.completed`, `customer.subscription.created`, `customer.subscription.updated` and `customer.subscription.deleted`. Copy its signing secret (`whsec_...`).
-3. Turn on the customer portal in Stripe's billing settings, so people can change cards and cancel.
-4. Set the three variables and restart.
+1. In Paystack, create a plan with a monthly interval and the price you charge, and copy its plan code (`PLN_...`).
+2. Under Settings, then API Keys and Webhooks, set the webhook URL to `https://app.docs.example.com/__host/billing/webhook` and copy the secret key (`sk_live_...`, or `sk_test_...` while testing).
+3. Set the two variables and restart.
 
-**Upgrade** sends the person to Stripe Checkout, and **Manage payment or cancel** opens the Stripe customer portal. Card details never reach this server. The plan changes only when a signed webhook arrives: signatures older than five minutes are refused, and an event for an old subscription cannot undo a newer one.
+**Upgrade to Pro** sends the person to Paystack's checkout, and **Manage payment or cancel** opens Paystack's page for changing the card or cancelling. Card details never reach this server. The plan changes only when a webhook signed with your secret key arrives, and only for your plan code:
+
+| Paystack event | Result |
+| --- | --- |
+| `charge.success` | Pro |
+| `subscription.create` | Pro, and the subscription is saved so it can be managed |
+| `subscription.not_renew` | Still Pro until the paid period ends |
+| `invoice.payment_failed` | Still Pro while Paystack retries |
+| `subscription.disable` | Back to Free |
+
+### Stripe
+
+Stripe is supported too and kept off until you choose it. Set `DOCUBASE_BILLING=stripe` with `STRIPE_SECRET_KEY`, `STRIPE_PRICE_ID` and `STRIPE_WEBHOOK_SECRET`, create a recurring price, turn on the customer portal, and add a webhook at the same `/__host/billing/webhook` address for `checkout.session.completed` and `customer.subscription.*` events. Stripe signatures older than five minutes are refused. The keys can sit in the environment beside Paystack's until then.
 
 When a subscription ends, the account drops to the free plan. Its sites stay online at their `<name>.docs.example.com` address, but custom domains stop answering and saved assistant keys are ignored until the person pays again. Nothing is deleted.
 
@@ -168,5 +180,5 @@ Customer repositories are untrusted input. Docubase only reads Markdown and an o
 * One server, one JSON database file. There is no clustering, and a restart pauses serving for a moment.
 * Isolation between customers is by process, not by container or virtual machine. Run the host in a network that cannot reach your internal services. The address check just before each request cannot stop a hostile DNS server that changes its answer between the check and the connection.
 * There is no email: no address confirmation and no password reset by mail. An admin can delete an account, or create a new one, through the admin API.
-* Billing has one paid plan with one price. Trials, coupons and taxes are whatever you set up in Stripe, since Checkout and the portal handle them.
+* Billing has one paid plan with one price, from one provider at a time. Trials, coupons and taxes are whatever you set up with the provider. Switching providers does not move existing subscriptions.
 * There are no per site quotas for bandwidth or storage beyond the build limits above.

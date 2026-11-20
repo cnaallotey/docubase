@@ -8,11 +8,13 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { createHost, readSettings } from '../src/index.js';
 import { formEncode, verifyStripeSignature } from '../src/billing.js';
+import { verifyPaystackSignature } from '../src/paystack.js';
 import { hashPassword, verifyPassword } from '../src/accounts.js';
 
 const TOKEN = 'admin-token-for-tests-0123456789';
 const MASTER = '0'.repeat(32) + 'b'.repeat(32);
-const STRIPE = { STRIPE_SECRET_KEY: 'sk_test_abcdefghijklmnop', STRIPE_PRICE_ID: 'price_TESTPRO123', STRIPE_WEBHOOK_SECRET: 'whsec_testsecret1234567890' };
+const STRIPE = { DOCUBASE_BILLING: 'stripe', STRIPE_SECRET_KEY: 'sk_test_abcdefghijklmnop', STRIPE_PRICE_ID: 'price_TESTPRO123', STRIPE_WEBHOOK_SECRET: 'whsec_testsecret1234567890' };
+const PAYSTACK = { PAYSTACK_SECRET_KEY: 'sk_test_0123456789abcdef0123456789abcdef01234567', PAYSTACK_PLAN_CODE: 'PLN_docubasepro' };
 const APP = 'app.docs.test';
 const cleanup = [];
 after(async () => { for (const fn of cleanup.reverse()) await fn().catch(() => {}); });
@@ -35,6 +37,30 @@ async function repo(files = { 'index.md': '# Hello\n\nHosted.' }) {
   git('add', '-A');
   git('commit', '-q', '-m', 'init');
   return `file://${root}`;
+}
+
+/** A stand in for the Paystack API: a plan, transaction initialize and the manage subscription link. */
+async function fakePaystack() {
+  const requests = [];
+  const server = createServer(async (req, res) => {
+    const parts = [];
+    for await (const chunk of req) parts.push(chunk);
+    const text = Buffer.concat(parts).toString('utf8');
+    requests.push({ method: req.method, url: req.url, headers: req.headers, body: text ? JSON.parse(text) : null });
+    let data = {};
+    if (req.url.startsWith('/plan/')) data = { plan_code: 'PLN_docubasepro', amount: 1200, currency: 'USD', interval: 'monthly' };
+    else if (req.url === '/transaction/initialize') data = { authorization_url: 'https://checkout.paystack.com/test_access_1', access_code: 'test_access_1', reference: 'ref_1' };
+    else if (req.url.endsWith('/manage/link')) data = { link: 'https://paystack.com/manage/subscriptions/SUB_1?subscription_token=t' };
+    res.writeHead(200, { 'content-type': 'application/json' }).end(JSON.stringify({ status: true, message: 'ok', data }));
+  });
+  await new Promise((r) => server.listen(0, '127.0.0.1', r));
+  cleanup.push(() => new Promise((r) => { server.close(r); server.closeAllConnections(); }));
+  return { requests, api: `http://127.0.0.1:${server.address().port}` };
+}
+
+function paystackEvent(event, secret = PAYSTACK.PAYSTACK_SECRET_KEY) {
+  const body = JSON.stringify(event);
+  return { body, header: createHmac('sha512', secret).update(body).digest('hex'), headerName: 'x-paystack-signature', path: '/__host/billing/webhook' };
 }
 
 /** A stand in for the Stripe API that records requests and answers like Stripe would. */
@@ -111,9 +137,9 @@ function signedEvent(event, secret = STRIPE.STRIPE_WEBHOOK_SECRET, at = Math.flo
   return { body, header: `t=${at},v1=${sig}` };
 }
 
-function postWebhook(port, { body, header }) {
+function postWebhook(port, { body, header, headerName = 'stripe-signature', path: pathName = '/__host/stripe/webhook' }) {
   return new Promise((resolve, reject) => {
-    const req = httpRequest({ host: '127.0.0.1', port, method: 'POST', path: '/__host/stripe/webhook', headers: { host: APP, 'content-type': 'application/json', 'stripe-signature': header, 'content-length': Buffer.byteLength(body) } }, (res) => {
+    const req = httpRequest({ host: '127.0.0.1', port, method: 'POST', path: pathName, headers: { host: APP, 'content-type': 'application/json', [headerName]: header, 'content-length': Buffer.byteLength(body) } }, (res) => {
       const parts = [];
       res.on('data', (d) => parts.push(d));
       res.on('end', () => resolve({ status: res.statusCode, text: Buffer.concat(parts).toString('utf8') }));
@@ -260,8 +286,92 @@ test('Stripe settings must come as a set and look right', () => {
   assert.throws(() => readSettings({ ...base, STRIPE_SECRET_KEY: STRIPE.STRIPE_SECRET_KEY }), /all three/);
   assert.throws(() => readSettings({ ...base, ...STRIPE, STRIPE_SECRET_KEY: 'pk_test_abcdefghijklmnop' }), /secret key/);
   assert.throws(() => readSettings({ ...base, DOCUBASE_SIGNUP: 'maybe' }), /open or closed/);
-  assert.equal(readSettings({ ...base, ...STRIPE }).stripe.priceId, 'price_TESTPRO123');
+  assert.equal(readSettings({ ...base, ...STRIPE }).billing.stripe.priceId, 'price_TESTPRO123');
+  assert.equal(readSettings({ ...base, ...STRIPE }).billing.provider, 'stripe');
 });
+
+test('Paystack is the default provider and Stripe stays off until it is chosen', () => {
+  const base = { DOCUBASE_ADMIN_TOKEN: TOKEN, DOCUBASE_MASTER_KEY: MASTER, DOCUBASE_BASE_DOMAIN: 'docs.test' };
+  const { DOCUBASE_BILLING, ...stripeKeys } = STRIPE;
+  assert.equal(readSettings({ ...base, ...PAYSTACK }).billing.provider, 'paystack');
+  assert.equal(readSettings({ ...base, ...stripeKeys }).billing.provider, null, 'Stripe keys alone do not turn billing on');
+  assert.equal(readSettings({ ...base, ...PAYSTACK, ...stripeKeys }).billing.provider, 'paystack', 'Stripe keys can wait beside Paystack');
+  assert.equal(readSettings({ ...base, ...PAYSTACK, ...STRIPE }).billing.provider, 'stripe');
+  assert.equal(readSettings({ ...base, ...PAYSTACK, DOCUBASE_BILLING: 'off' }).billing.provider, null);
+  assert.throws(() => readSettings({ ...base, PAYSTACK_SECRET_KEY: PAYSTACK.PAYSTACK_SECRET_KEY }), /Set both/);
+  assert.throws(() => readSettings({ ...base, ...PAYSTACK, PAYSTACK_SECRET_KEY: 'pk_test_0123456789abcdef0123456789' }), /Paystack secret key/);
+  assert.throws(() => readSettings({ ...base, ...PAYSTACK, PAYSTACK_PLAN_CODE: 'plan-1' }), /PLN_/);
+  assert.throws(() => readSettings({ ...base, DOCUBASE_BILLING: 'stripe' }), /needs STRIPE_SECRET_KEY/);
+  assert.throws(() => readSettings({ ...base, DOCUBASE_BILLING: 'paypal' }), /paystack, stripe or off/);
+});
+
+test('Paystack webhook signatures are checked', () => {
+  const { body, header } = paystackEvent({ event: 'ping' });
+  assert.equal(verifyPaystackSignature(PAYSTACK.PAYSTACK_SECRET_KEY, Buffer.from(body), header), true);
+  assert.equal(verifyPaystackSignature('sk_test_other', Buffer.from(body), header), false);
+  assert.equal(verifyPaystackSignature(PAYSTACK.PAYSTACK_SECRET_KEY, Buffer.from(body + ' '), header), false, 'a changed body fails');
+  assert.equal(verifyPaystackSignature(PAYSTACK.PAYSTACK_SECRET_KEY, Buffer.from(body), 'abc'), false);
+});
+
+test('Paystack: checkout opens Paystack, webhooks move the plan, and the manage link works', async () => {
+  const paystack = await fakePaystack();
+  const { port } = await startHost({ DOCUBASE_SIGNUP: 'open', DOCUBASE_FREE_SITES: '1', ...PAYSTACK }, { paystackApi: paystack.api });
+  const kim = client(port);
+  const signed = await kim.send('POST', '/api/signup', { json: { email: 'kim@example.com', password: 'kim long password' } });
+  assert.equal(signed.json.limits.plan, 'free');
+  assert.deepEqual(signed.json.billing, { enabled: true, provider: 'Paystack' });
+  const userId = signed.json.user.id;
+
+  const checkout = await kim.send('POST', '/api/billing/checkout');
+  assert.equal(checkout.status, 200, checkout.text);
+  assert.equal(checkout.json.url, 'https://checkout.paystack.com/test_access_1');
+  assert.equal(paystack.requests[0].url, '/plan/PLN_docubasepro');
+  const init = paystack.requests[1];
+  assert.equal(init.url, '/transaction/initialize');
+  assert.equal(init.headers.authorization, `Bearer ${PAYSTACK.PAYSTACK_SECRET_KEY}`);
+  assert.deepEqual({ email: init.body.email, amount: init.body.amount, currency: init.body.currency, plan: init.body.plan }, { email: 'kim@example.com', amount: 1200, currency: 'USD', plan: 'PLN_docubasepro' });
+  assert.equal(init.body.metadata.docubase_user, userId);
+  assert.match(init.body.callback_url, /^https:\/\/app\.docs\.test\/#\/billing\?done=1$/);
+  assert.match(init.body.metadata.cancel_action, /#\/billing$/);
+
+  // Forged, or signed with a Stripe style header only: nothing changes.
+  const charge = { event: 'charge.success', data: { status: 'success', metadata: { docubase_user: userId }, plan: { plan_code: 'PLN_docubasepro' }, customer: { customer_code: 'CUS_kim' } } };
+  assert.equal((await postWebhook(port, paystackEvent(charge, 'sk_test_attacker'))).status, 400);
+  assert.equal((await dee(kim)).limits.plan, 'free');
+
+  // Another plan on the same Paystack account is ignored.
+  assert.match((await postWebhook(port, paystackEvent({ ...charge, data: { ...charge.data, plan: { plan_code: 'PLN_other' } } }))).text, /ignored/);
+
+  assert.equal((await postWebhook(port, paystackEvent(charge))).status, 200);
+  assert.equal((await dee(kim)).limits.plan, 'pro');
+  assert.equal((await kim.send('POST', '/api/billing/portal')).status, 400, 'no subscription code yet');
+
+  const created = { event: 'subscription.create', data: { subscription_code: 'SUB_1', status: 'active', plan: { plan_code: 'PLN_docubasepro' }, customer: { customer_code: 'CUS_kim' } } };
+  assert.equal((await postWebhook(port, paystackEvent(created))).status, 200);
+  const portal = await kim.send('POST', '/api/billing/portal');
+  assert.equal(portal.json.url, 'https://paystack.com/manage/subscriptions/SUB_1?subscription_token=t');
+  assert.equal(paystack.requests.at(-1).url, '/subscription/SUB_1/manage/link');
+  assert.equal((await kim.send('POST', '/api/billing/checkout')).status, 409, 'already on the paid plan');
+
+  // Turning off renewal keeps Pro until the period ends; then the disable event moves it back to free.
+  const notRenew = { event: 'subscription.not_renew', data: { ...created.data, status: 'non-renewing' } };
+  assert.equal((await postWebhook(port, paystackEvent(notRenew))).status, 200);
+  assert.equal((await dee(kim)).limits.plan, 'pro');
+  assert.equal((await kim.send('DELETE', '/api/account', { json: { password: 'kim long password' } })).status, 409);
+  const disabled = { event: 'subscription.disable', data: { ...created.data, status: 'complete' } };
+  assert.equal((await postWebhook(port, paystackEvent(disabled))).status, 200);
+  const after = await dee(kim);
+  assert.equal(after.limits.plan, 'free');
+  assert.equal(after.user.subscription, 'complete');
+
+  // The Stripe path still answers, but only to Paystack signed events while Paystack is the provider.
+  assert.equal((await postWebhook(port, { ...paystackEvent(created), path: '/__host/stripe/webhook' })).status, 200);
+  assert.equal((await postWebhook(port, signedEvent({ type: 'checkout.session.completed', data: { object: {} } }))).status, 400);
+});
+
+async function dee(c) {
+  return (await c.send('GET', '/api/session')).json;
+}
 
 test('Stripe webhook signatures are checked, including their age', () => {
   const { body, header } = signedEvent({ type: 'ping' });
@@ -351,7 +461,7 @@ test('plans: free users are limited, checkout goes to Stripe, and webhooks move 
   assert.equal((await dee.send('GET', '/api/session')).json.limits.plan, 'pro');
 });
 
-test('without Stripe there are no plans and billing routes are off', async () => {
+test('without a payment provider there are no plans and billing routes are off', async () => {
   const { port } = await startHost({ DOCUBASE_SIGNUP: 'open' });
   const eve = client(port);
   const signed = await eve.send('POST', '/api/signup', { json: { email: 'eve@example.com', password: 'eve long password' } });

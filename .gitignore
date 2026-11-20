@@ -8,4 +8,5 @@ packages/nuxt/test/.fixture-*
 .data
 
 examples/playground/.host-data
+examples/playground/.env
 docker/.env

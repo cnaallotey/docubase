@@ -7,6 +7,7 @@
 //   open http://app.localhost:8090
 //
 // Sites are served at http://<name>.localhost:8090. Browsers resolve *.localhost to this machine.
+// Settings such as the Paystack test keys can go in examples/playground/.env (copy .env.example).
 import { randomBytes } from 'node:crypto';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
@@ -14,6 +15,12 @@ import { fileURLToPath } from 'node:url';
 import { createHost, readSettings } from '../../packages/host/src/index.js';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
+// Values already in the environment win over the file. The file is git ignored.
+try {
+  process.loadEnvFile(path.join(here, '.env'));
+} catch (error) {
+  if (error.code !== 'ENOENT') throw error;
+}
 const port = Number(process.env.PORT || 8090);
 const adminToken = randomBytes(24).toString('base64url');
 const dataDir = process.env.DOCUBASE_DATA_DIR || path.join(here, '.host-data');

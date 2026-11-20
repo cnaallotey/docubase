@@ -104,7 +104,7 @@ Since then:
 * **Streaming Ask AI.** Answers arrive token by token over Server-Sent Events, in the default theme and the Nuxt theme. Closing the dialog cancels the model request. Clients that do not ask for a stream still get one JSON reply.
 * **Hosted MCP endpoint.** Set `"mcp": { "enabled": true }` and `docubase start`, or the hosting server, answers MCP's Streamable HTTP transport at `/__docubase/mcp` with the same read only tools as `docubase mcp`.
 * **Client side navigation in Nuxt.** Docs links, search results and assistant sources move through the Nuxt router, and the theme script runs again on each new page.
-* **Dashboard and billing.** `app.<base domain>` has sign up and sign in, site management, build logs, custom domains checked by DNS TXT record, assistant keys, and Stripe Checkout and customer portal for a paid plan. Without Stripe keys there are no plans.
+* **Dashboard and billing.** `app.<base domain>` has sign up and sign in, site management, build logs, custom domains checked by DNS TXT record, assistant keys, and Paystack checkout and subscription management for a paid plan (Stripe is built in too, off until chosen). Without payment keys there are no plans.
 
 ## Not built yet
 

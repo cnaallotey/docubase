@@ -357,8 +357,8 @@
           h('p', { class: 'eyebrow', text: 'Upgrade' }),
           h('p', { class: 'plan', text: 'Pro' }),
           h('p', { text: 'More sites, your own domains, and Ask AI on every site.' }),
-          h('button', { type: 'button', class: 'btn primary', onclick: go('checkout'), text: 'Upgrade with Stripe' }),
-          h('p', { class: 'muted small', text: 'Payment happens on Stripe. Card details never reach this server.' }),
+          h('button', { type: 'button', class: 'btn primary', onclick: go('checkout'), text: 'Upgrade to Pro' }),
+          h('p', { class: 'muted small', text: 'Payment happens on ' + (session.billing.provider || 'the payment provider') + '. Card details never reach this server.' }),
         ]),
       ])
     );

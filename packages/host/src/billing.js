@@ -1,4 +1,19 @@
 import { createHmac, timingSafeEqual } from 'node:crypto';
+import { BillingError } from './billing-error.js';
+import { createPaystackBilling } from './paystack.js';
+
+export { BillingError };
+
+/**
+ * Billing for the paid plan, from one of two providers chosen in the settings: Paystack, which is the
+ * default, or Stripe, which is kept ready and turns on only when DOCUBASE_BILLING=stripe. Both offer
+ * the same interface: checkout, portal, verify and interpret.
+ */
+export function createBilling({ provider = null, stripe = {}, paystack = {} } = {}, { fetchImpl, stripeApi, paystackApi } = {}) {
+  if (provider === 'paystack') return createPaystackBilling({ ...paystack, fetchImpl, apiBase: paystackApi });
+  if (provider === 'stripe') return createStripeBilling({ ...stripe, fetchImpl, apiBase: stripeApi });
+  return { enabled: false, provider: null, label: null, isActive: () => false };
+}
 
 /**
  * Stripe billing over its REST API, without the Stripe SDK. Only three calls are needed: create a
@@ -9,13 +24,6 @@ import { createHmac, timingSafeEqual } from 'node:crypto';
 const STRIPE_API = 'https://api.stripe.com/v1';
 const SIGNATURE_TOLERANCE_SECONDS = 300;
 const ACTIVE = new Set(['active', 'trialing', 'past_due']);
-
-export class BillingError extends Error {
-  constructor(status, message) {
-    super(message);
-    this.status = status;
-  }
-}
 
 /** Stripe takes form encoded bodies with bracketed keys, such as line_items[0][price]. */
 export function formEncode(values, prefix = '') {
@@ -47,7 +55,7 @@ export function planForStatus(status) {
   return ACTIVE.has(status) ? 'pro' : 'free';
 }
 
-export function createBilling({ secretKey, priceId, webhookSecret, fetchImpl = globalThis.fetch, apiBase = STRIPE_API }) {
+export function createStripeBilling({ secretKey, priceId, webhookSecret, fetchImpl = globalThis.fetch, apiBase = STRIPE_API }) {
   const enabled = Boolean(secretKey && priceId && webhookSecret);
 
   async function call(pathName, values) {
@@ -71,6 +79,9 @@ export function createBilling({ secretKey, priceId, webhookSecret, fetchImpl = g
 
   return {
     enabled,
+    provider: 'stripe',
+    label: 'Stripe',
+    isActive: (status) => ACTIVE.has(status),
 
     /** Start a subscription. Returns the address of Stripe's hosted payment page. */
     async checkout(user, { successUrl, cancelUrl }) {
@@ -96,13 +107,14 @@ export function createBilling({ secretKey, priceId, webhookSecret, fetchImpl = g
       return session.url;
     },
 
-    verify(rawBody, header) {
-      return verifyStripeSignature(webhookSecret, rawBody, header);
+    verify(rawBody, headers) {
+      return verifyStripeSignature(webhookSecret, rawBody, headers['stripe-signature']);
     },
 
     /**
      * Turn a verified webhook event into a change for one user, or null when it does not matter.
-     * Returns { userId?, customerId, subscriptionId, status } where userId is only known on checkout.
+     * Returns { userId?, customerId, subscriptionId, status, fresh } where userId is only known on checkout
+     * and fresh marks a completed checkout.
      */
     interpret(event) {
       const object = event?.data?.object;
@@ -113,6 +125,7 @@ export function createBilling({ secretKey, priceId, webhookSecret, fetchImpl = g
           customerId: String(object.customer || ''),
           subscriptionId: String(object.subscription || ''),
           status: 'active',
+          fresh: true,
         };
       }
       if (event.type === 'customer.subscription.created' || event.type === 'customer.subscription.updated' || event.type === 'customer.subscription.deleted') {
@@ -121,6 +134,7 @@ export function createBilling({ secretKey, priceId, webhookSecret, fetchImpl = g
           customerId: String(object.customer || ''),
           subscriptionId: String(object.id || ''),
           status: event.type === 'customer.subscription.deleted' ? 'canceled' : String(object.status || ''),
+          fresh: false,
         };
       }
       return null;

@@ -106,7 +106,7 @@ export function createHost({ settings, log = console, buildFn = buildSite, unsaf
   const siteUrl = (site) => `${config.publicUrl && config.publicUrl.startsWith('http:') ? 'http' : 'https'}://${site.slug}.${config.baseDomain}${publicPort}`;
   const info = (event, data = {}) => log.log(JSON.stringify({ at: new Date().toISOString(), event, ...data }));
   const resolveTxt = unsafeForTests.resolveTxt || ((name) => dns.resolveTxt(name));
-  const billing = createBilling({ ...(config.stripe || {}), fetchImpl: unsafeForTests.stripeFetch, apiBase: unsafeForTests.stripeApi });
+  const billing = createBilling(config.billing, { fetchImpl: unsafeForTests.billingFetch, stripeApi: unsafeForTests.stripeApi, paystackApi: unsafeForTests.paystackApi });
 
   /**
    * What a user may do. Without billing there are no plans, only a per user site cap. With billing,
@@ -586,12 +586,12 @@ export function createHost({ settings, log = console, buildFn = buildSite, unsaf
     throw new ApiError(405, 'Use PATCH or DELETE');
   }
 
-  /** Stripe tells us when a subscription starts, changes or ends. Only signed events are read. */
-  async function stripeWebhook(req, res) {
+  /** The payment provider tells us when a subscription starts, changes or ends. Only signed events are read. */
+  async function billingWebhook(req, res) {
     if (req.method !== 'POST') return sendJson(res, 405, { error: 'Use POST' }, { allow: 'POST' });
     const raw = await readBody(req, WEBHOOK_BODY_LIMIT);
     if (!billing.enabled) return sendJson(res, 404, { error: 'Billing is not set up on this server' });
-    if (!billing.verify(raw, req.headers['stripe-signature'])) return sendJson(res, 400, { error: 'Invalid signature' });
+    if (!billing.verify(raw, req.headers)) return sendJson(res, 400, { error: 'Invalid signature' });
     let event;
     try {
       event = JSON.parse(raw.toString('utf8'));
@@ -599,19 +599,19 @@ export function createHost({ settings, log = console, buildFn = buildSite, unsaf
       return sendJson(res, 400, { error: 'The payload is not JSON' });
     }
     const change = billing.interpret(event);
-    if (!change) return sendJson(res, 200, { ignored: String(event.type || '').slice(0, 60) });
+    if (!change) return sendJson(res, 200, { ignored: String(event.type || event.event || '').slice(0, 60) });
     const user = (change.userId && store.user(change.userId)) || store.userByCustomer(change.customerId);
     if (!user) {
-      info('billing.unmatched', { type: event.type });
+      info('billing.unmatched', { type: event.type || event.event });
       return sendJson(res, 200, { ignored: 'no matching user' });
     }
     await store.update((data) => {
       const u = data.users[user.id];
       if (!u) return;
       // A late "updated" event for an old subscription must not undo a newer one.
-      if (u.billing?.subscriptionId && change.subscriptionId && u.billing.subscriptionId !== change.subscriptionId && event.type !== 'checkout.session.completed' && change.status !== 'active' && change.status !== 'trialing') return;
-      u.billing = { customerId: change.customerId || u.billing?.customerId || null, subscriptionId: change.subscriptionId || u.billing?.subscriptionId || null, status: change.status, updatedAt: new Date().toISOString() };
-      u.plan = change.status === 'active' || change.status === 'trialing' || change.status === 'past_due' ? 'pro' : 'free';
+      if (u.billing?.subscriptionId && change.subscriptionId && u.billing.subscriptionId !== change.subscriptionId && !change.fresh && !billing.isActive(change.status)) return;
+      u.billing = { provider: billing.provider, customerId: change.customerId || u.billing?.customerId || null, subscriptionId: change.subscriptionId || u.billing?.subscriptionId || null, status: change.status, updatedAt: new Date().toISOString() };
+      u.plan = billing.isActive(change.status) ? 'pro' : 'free';
     });
     for (const site of store.sitesOf(user.id)) assistants.delete(site.slug);
     info('billing.update', { user: user.id, status: change.status });
@@ -680,7 +680,8 @@ export function createHost({ settings, log = console, buildFn = buildSite, unsaf
         return await api(req, res, pathname);
       }
       if (pathname.startsWith('/__host/webhook/')) return await webhook(req, res, pathname);
-      if (pathname === '/__host/stripe/webhook') return await stripeWebhook(req, res);
+      // One webhook address for either provider; the older Stripe path keeps working.
+      if (pathname === '/__host/billing/webhook' || pathname === '/__host/stripe/webhook' || pathname === '/__host/paystack/webhook') return await billingWebhook(req, res);
       if (config.dashboardHost && host === config.dashboardHost) return await dashboard.handle(req, res, pathname);
       return await serveSite(req, res, host, pathname);
     } catch (error) {

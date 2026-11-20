@@ -16,7 +16,11 @@ services:
       DOCUBASE_TRUST_PROXY: "1"
       DOCUBASE_DASHBOARD_HOST: app.${DOCUBASE_BASE_DOMAIN}
       DOCUBASE_SIGNUP: ${DOCUBASE_SIGNUP:-closed}
-      # Billing is on only when all three are set. Leave them empty for a server without plans.
+      # Billing with Paystack is on when both are set. Leave them empty for a server without plans.
+      PAYSTACK_SECRET_KEY: ${PAYSTACK_SECRET_KEY:-}
+      PAYSTACK_PLAN_CODE: ${PAYSTACK_PLAN_CODE:-}
+      # Stripe stays off until DOCUBASE_BILLING=stripe.
+      DOCUBASE_BILLING: ${DOCUBASE_BILLING:-}
       STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
       STRIPE_PRICE_ID: ${STRIPE_PRICE_ID:-}
       STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}

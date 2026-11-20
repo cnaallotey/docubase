@@ -43,23 +43,46 @@ export function readSettings(env = process.env) {
   const signup = String(env.DOCUBASE_SIGNUP || 'closed').trim().toLowerCase();
   if (!['open', 'closed'].includes(signup)) throw new SettingsError('DOCUBASE_SIGNUP must be open or closed');
 
-  // Billing is on only when all three Stripe values are present. Without it there are no plans.
+  // Billing for the paid plan. Paystack is used whenever its keys are set. Stripe is kept ready but
+  // stays off until DOCUBASE_BILLING=stripe, so its keys can be filled in ahead of time. Without a
+  // provider there are no plans.
+  const paystack = {
+    secretKey: String(env.PAYSTACK_SECRET_KEY || '').trim() || null,
+    planCode: String(env.PAYSTACK_PLAN_CODE || '').trim() || null,
+  };
+  const paystackSet = Object.values(paystack).filter(Boolean).length;
+  if (paystackSet === 1) throw new SettingsError('Billing with Paystack needs PAYSTACK_SECRET_KEY and PAYSTACK_PLAN_CODE together. Set both, or neither.');
+  if (paystack.secretKey && !/^sk_(test|live)_[A-Za-z0-9]{20,}$/.test(paystack.secretKey)) throw new SettingsError('PAYSTACK_SECRET_KEY does not look like a Paystack secret key (sk_test_... or sk_live_...)');
+  if (paystack.planCode && !/^PLN_[A-Za-z0-9]{6,}$/.test(paystack.planCode)) throw new SettingsError('PAYSTACK_PLAN_CODE must be a Paystack plan code such as PLN_abc123');
+
   const stripe = {
     secretKey: String(env.STRIPE_SECRET_KEY || '').trim() || null,
     priceId: String(env.STRIPE_PRICE_ID || '').trim() || null,
     webhookSecret: String(env.STRIPE_WEBHOOK_SECRET || '').trim() || null,
   };
   const stripeSet = Object.values(stripe).filter(Boolean).length;
-  if (stripeSet > 0 && stripeSet < 3) throw new SettingsError('Billing needs STRIPE_SECRET_KEY, STRIPE_PRICE_ID and STRIPE_WEBHOOK_SECRET together. Set all three, or none.');
+  if (stripeSet > 0 && stripeSet < 3) throw new SettingsError('Billing with Stripe needs STRIPE_SECRET_KEY, STRIPE_PRICE_ID and STRIPE_WEBHOOK_SECRET together. Set all three, or none.');
   if (stripe.secretKey && !/^(sk|rk)_(test|live)_[A-Za-z0-9]{10,}$/.test(stripe.secretKey)) throw new SettingsError('STRIPE_SECRET_KEY does not look like a Stripe secret key (sk_test_... or sk_live_...)');
   if (stripe.priceId && !/^price_[A-Za-z0-9]{6,}$/.test(stripe.priceId)) throw new SettingsError('STRIPE_PRICE_ID must be a Stripe price id such as price_1Abc...');
   if (stripe.webhookSecret && !/^whsec_[A-Za-z0-9]{10,}$/.test(stripe.webhookSecret)) throw new SettingsError('STRIPE_WEBHOOK_SECRET must be a Stripe webhook signing secret (whsec_...)');
+
+  const choice = String(env.DOCUBASE_BILLING || '').trim().toLowerCase();
+  if (choice && !['paystack', 'stripe', 'off'].includes(choice)) throw new SettingsError('DOCUBASE_BILLING must be paystack, stripe or off');
+  let provider = null;
+  if (choice === 'stripe') {
+    if (stripeSet !== 3) throw new SettingsError('DOCUBASE_BILLING=stripe needs STRIPE_SECRET_KEY, STRIPE_PRICE_ID and STRIPE_WEBHOOK_SECRET');
+    provider = 'stripe';
+  } else if (choice === 'paystack' || (choice === '' && paystackSet === 2)) {
+    if (paystackSet !== 2) throw new SettingsError('DOCUBASE_BILLING=paystack needs PAYSTACK_SECRET_KEY and PAYSTACK_PLAN_CODE');
+    provider = 'paystack';
+  }
+  const billing = { provider, paystack, stripe };
 
   return {
     adminHost,
     dashboardHost,
     signup,
-    stripe,
+    billing,
     userMaxSites: int(env, 'DOCUBASE_USER_MAX_SITES', 3, 1, 10000),
     freePlanSites: int(env, 'DOCUBASE_FREE_SITES', 1, 0, 10000),
     proPlanSites: int(env, 'DOCUBASE_PRO_SITES', 10, 1, 10000),

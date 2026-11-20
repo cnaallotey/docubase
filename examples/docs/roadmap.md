@@ -21,7 +21,7 @@ order: 3
 * Streaming Ask AI answers
 * A hosted MCP endpoint, from `docubase start` and from the hosting server
 * Client side navigation in the Nuxt theme
-* A dashboard with sign up, site management, verified custom domains and Stripe billing for the hosting server
+* A dashboard with sign up, site management, verified custom domains and billing through Paystack (or Stripe) for the hosting server
 
 ## Planned
 
