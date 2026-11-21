@@ -389,6 +389,8 @@ code, kbd, pre { font-family: var(--mono); }
 .plan-featured .plan-price small { color: var(--white-3); }
 .plan-featured ul { border-color: rgba(255, 255, 255, 0.1); }
 .plan-featured li::before { background-color: var(--accent); }
+.plan .btn-soon { justify-content: center; padding: 0 22px; cursor: default; background: rgba(255, 255, 255, 0.08); color: var(--white-2); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12); }
+th .soon { margin-left: 6px; padding: 2px 8px; border-radius: 6px; background: var(--accent); color: var(--on-accent); font-size: 11px; font-weight: 500; vertical-align: 2px; }
 
 .table-wrap { overflow-x: auto; border-radius: var(--r-lg); background: var(--cream); padding: 8px 24px; }
 .table-wrap table { width: 100%; min-width: 620px; border-collapse: collapse; font-size: 15px; }

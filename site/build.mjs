@@ -161,6 +161,7 @@ const posts = blog.site.blog.posts.slice(0, 3).map((post, i) => `        <li dat
           <span class="p-title">${esc(post.title)}</span>
           <span class="p-more">${esc(post.readingMinutes)} min read${arrow}</span>
         </a></li>`).join('\n');
+const proLaunched = config.plans.proLaunched === true;
 const plans = await readFile(path.join(src, '_plans.html'), 'utf8');
 const faq = await readFile(path.join(src, '_faq.html'), 'utf8');
 
@@ -181,7 +182,15 @@ const values = {
   arrow,
   dashboardUrl: esc(dashboardUrl),
   proPrice: esc(config.plans.proPrice),
-  proPeriod: esc(config.plans.proPeriod),
+  // Until Pro launches the card shows its planned price with a "Coming soon" tag and no sign-up button.
+  proPeriod: esc(proLaunched ? config.plans.proPeriod : `${config.plans.proPeriod} at launch`),
+  proTag: proLaunched ? 'For teams' : 'Coming soon',
+  proDesc: proLaunched ? 'For teams whose docs are part of the product.' : 'For teams whose docs are part of the product. We are still building it.',
+  proCta: proLaunched
+    ? `<a class="btn btn-accent" href="${esc(dashboardUrl)}" data-magnetic>Start with Pro${arrow}</a>`
+    : '<span class="btn btn-soon" aria-disabled="true">Coming soon</span>',
+  proSoon: proLaunched ? '' : ' <small class="soon">Soon</small>',
+  proSoonNote: proLaunched ? '' : ', coming soon,',
   freeSites: esc(config.plans.freeSites),
   proSites: esc(config.plans.proSites),
 };

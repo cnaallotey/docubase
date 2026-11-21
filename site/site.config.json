@@ -4,6 +4,7 @@
   "twitter": null,
   "githubUrl": null,
   "plans": {
+    "proLaunched": false,
     "proPrice": "$12",
     "proPeriod": "per month",
     "freeSites": 1,

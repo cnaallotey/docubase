@@ -25,10 +25,10 @@
           </ul>
         </article>
         <article class="plan plan-featured" data-reveal style="--rd:2">
-          <p class="plan-k">Pro <span class="tag">For teams</span></p>
+          <p class="plan-k">Pro <span class="tag">{{proTag}}</span></p>
           <p class="plan-price">{{proPrice}}<small>{{proPeriod}}</small></p>
-          <p class="plan-desc">For teams whose docs are part of the product.</p>
-          <a class="btn btn-accent" href="{{dashboardUrl}}" data-magnetic>Start with Pro{{arrow}}</a>
+          <p class="plan-desc">{{proDesc}}</p>
+          {{proCta}}
           <ul>
             <li>{{proSites}} sites</li>
             <li>Custom domains, verified by DNS</li>
